@@ -3,44 +3,42 @@ package com.clinica.api.entities;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
+
 @Entity
-@Table(name = "medico")
+@Table(name = "paciente")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Medico {
-
+public class Paciente {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "O nome do medico é obrigatório.")
+    @NotBlank(message = "O nome do paciente é obrigatório.")
     @Column(nullable = false)
     private String nome;
 
-    @NotBlank(message = "O crm do médico é obrigatório")
-    @Column(nullable = false ,unique = true)
-    private String crm;
+    @NotBlank(message = "O campo CPF é obrigatório")
+    @Column(nullable = false, unique = true)
+    private String cpf;
 
     @NotBlank(message = "O campo E-mail é obrigatório")
-    @Email(message = "O e-mail é invalido")
+    @Email(message = "O e-mail é inválido")
     @Column(nullable = false, unique = true)
     private String email;
 
     private String telefone;
 
-    @NotNull(message = "A especialidade é obrigatoria")
-    @ManyToOne
-    @JoinColumn(name = "especialidade_id", nullable = false)
-    private Especialidade especialidade;
+    private LocalDate dataNascimento;
 
     @Column(nullable = false)
     private Boolean ativo = true;
+
 }
