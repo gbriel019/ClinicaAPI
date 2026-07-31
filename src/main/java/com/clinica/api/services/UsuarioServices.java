@@ -1,6 +1,6 @@
 package com.clinica.api.services;
 
-import com.clinica.api.entities.Especialidade;
+
 import com.clinica.api.entities.Usuario;
 import com.clinica.api.repositories.UsuarioRepository;
 import org.springframework.stereotype.Service;

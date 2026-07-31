@@ -26,7 +26,6 @@ public class EspecialidadeService {
 
     public Especialidade salvar(Especialidade especialidade) {
 
-
         if (especialidadeRepository.findByNome(especialidade.getNome()).isPresent()) {
             throw new RuntimeException("Já existe uma especialidade com esse nome");
         }
@@ -40,8 +39,6 @@ public class EspecialidadeService {
 
         return especialidadeRepository.save(especialidade);
     }
-
-
 
     public void deletar(Long id){
         Especialidade especialidade = buscarPorId(id);
