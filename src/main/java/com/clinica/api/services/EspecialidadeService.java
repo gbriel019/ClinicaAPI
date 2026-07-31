@@ -25,10 +25,26 @@ public class EspecialidadeService {
     }
 
     public Especialidade salvar(Especialidade especialidade) {
+
+
+        if (especialidadeRepository.findByNome(especialidade.getNome()).isPresent()) {
+            throw new RuntimeException("Já existe uma especialidade com esse nome");
+        }
         return especialidadeRepository.save(especialidade);
     }
 
+    public Especialidade atualizar(Long id, Especialidade especialidadeAtualizada) {
+        Especialidade especialidade = buscarPorId(id);
+
+        especialidade.setNome(especialidadeAtualizada.getNome());
+
+        return especialidadeRepository.save(especialidade);
+    }
+
+
+
     public void deletar(Long id){
-        especialidadeRepository.deleteById(id);
+        Especialidade especialidade = buscarPorId(id);
+        especialidadeRepository.delete(especialidade);
     }
 }
