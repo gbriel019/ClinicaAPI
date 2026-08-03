@@ -4,12 +4,14 @@ import java.time.DayOfWeek;
 import com.clinica.api.entities.Consulta;
 import com.clinica.api.entities.Medico;
 import com.clinica.api.entities.Paciente;
+import com.clinica.api.enums.StatusConsulta;
 import com.clinica.api.exception.NotFound;
 import com.clinica.api.repositories.ConsultaRepository;
 import com.clinica.api.repositories.MedicoRepository;
 import com.clinica.api.repositories.PacienteRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -58,5 +60,19 @@ public class ConsultaService {
         if (diaSemana == DayOfWeek.SATURDAY || diaSemana == DayOfWeek.SUNDAY) {
             throw new RuntimeException("Dia indisponivel para Agendamento");
         }
+
+        if (consultaRepository.existsByMedicoAndDataHora(medico, consulta.getDataHora())) {
+            throw new RuntimeException("O médico já possui uma consulta neste horário");
+        }
+
+        LocalDateTime inicioDoDia = consulta.getDataHora().toLocalDate().atStartOfDay();
+        LocalDateTime finalDoDia = consulta.getDataHora().toLocalDate().atTime(23, 59, 59);
+
+        if (consultaRepository.existsByPacienteAndDataHora(paciente, inicioDoDia, finalDoDia)) {
+            throw new RuntimeException("O paciente já possui uma consulta Agendada neste dia");
+        }
+
+        consulta.setStatus(StatusConsulta.AGENDADA);
+        return consultaRepository.save(consulta);
     }
 }
