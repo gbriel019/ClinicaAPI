@@ -19,13 +19,13 @@ public class MedicoController {
     }
 
     @GetMapping
-    public List<Medico> buscarTodos(){
-        return medicoService.buscarTodos();
+    public ResponseEntity<List<Medico>> buscarTodos(){
+        return ResponseEntity.ok(medicoService.buscarTodos());
     }
 
     @GetMapping("/{id}")
-    public Medico buscarPorId(@PathVariable Long id) {
-        return medicoService.buscarPorId(id);
+    public ResponseEntity<Medico> buscarPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(medicoService.buscarPorId(id));
     }
 
     @PostMapping
@@ -35,8 +35,10 @@ public class MedicoController {
     }
 
     @PutMapping("/{id}")
-    public Medico atualizar(@PathVariable Long id, @Valid @RequestBody Medico medico){
-        return medicoService.atualizar(id, medico);
+    public ResponseEntity<Medico> atualizar(@PathVariable Long id, @Valid @RequestBody Medico medico){
+
+        Medico medicoAtualizado = medicoService.atualizar(id, medico);
+        return ResponseEntity.ok(medicoAtualizado);
     }
 
     @DeleteMapping("/{id}")

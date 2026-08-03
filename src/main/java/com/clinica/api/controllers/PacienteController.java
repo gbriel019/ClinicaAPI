@@ -2,6 +2,8 @@ package com.clinica.api.controllers;
 
 import com.clinica.api.entities.Paciente;
 import com.clinica.api.services.PacienteService;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,12 +19,13 @@ public class PacienteController {
     }
 
     @GetMapping
-    public List<Paciente> buscarTodos(){
-        return pacienteService.buscarTodos();
+    public ResponseEntity<List<Paciente>> buscarTodos(){
+        return ResponseEntity.ok(pacienteService.buscarTodos());
     }
 
     @PostMapping
-    public Paciente salvar(@RequestBody Paciente paciente) {
-        return pacienteService.salvar(paciente);
+    public ResponseEntity<Paciente> salvar(@Valid @RequestBody Paciente paciente) {
+        Paciente pacienteSalvo = pacienteService.salvar(paciente);
+        return ResponseEntity.ok(pacienteSalvo);
     }
 }
