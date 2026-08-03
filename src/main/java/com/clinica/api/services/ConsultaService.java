@@ -69,7 +69,7 @@ public class ConsultaService {
         LocalDateTime inicioDoDia = consulta.getDataHora().toLocalDate().atStartOfDay();
         LocalDateTime finalDoDia = consulta.getDataHora().toLocalDate().atTime(23, 59, 59);
 
-        if (consultaRepository.existsByPacienteAndDataHora(paciente, inicioDoDia, finalDoDia)) {
+        if (consultaRepository.existsByPacienteAndDataHoraBetween(paciente, inicioDoDia, finalDoDia)) {
             throw new RuntimeException("O paciente já possui uma consulta Agendada neste dia");
         }
 
@@ -91,4 +91,6 @@ public class ConsultaService {
 
         return consultaRepository.save(consulta);
     }
+
+
 }
