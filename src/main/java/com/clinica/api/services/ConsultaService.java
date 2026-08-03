@@ -11,6 +11,7 @@ import com.clinica.api.repositories.MedicoRepository;
 import com.clinica.api.repositories.PacienteRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -73,6 +74,21 @@ public class ConsultaService {
         }
 
         consulta.setStatus(StatusConsulta.AGENDADA);
+        return consultaRepository.save(consulta);
+    }
+
+    public Consulta cancelar(Long id, String motivo) {
+        Consulta consulta = buscarPorId(id);
+        LocalDateTime agora = LocalDateTime.now();
+        long horas = Duration.between(agora, consulta.getDataHora()).toHours();
+
+        if (horas <24){
+            throw new RuntimeException("A consulta so pode ser cancelada com 24 horas de antecedencia");
+        }
+
+        consulta.setStatus(StatusConsulta.CANCELADA);
+        consulta.setMotivoCancelamento(motivo);
+
         return consultaRepository.save(consulta);
     }
 }
