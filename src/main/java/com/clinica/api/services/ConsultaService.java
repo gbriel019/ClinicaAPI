@@ -1,9 +1,9 @@
 package com.clinica.api.services;
 
+import java.time.DayOfWeek;
 import com.clinica.api.entities.Consulta;
 import com.clinica.api.entities.Medico;
 import com.clinica.api.entities.Paciente;
-import com.clinica.api.enums.Role;
 import com.clinica.api.exception.NotFound;
 import com.clinica.api.repositories.ConsultaRepository;
 import com.clinica.api.repositories.MedicoRepository;
@@ -49,5 +49,14 @@ public class ConsultaService {
             throw new RuntimeException(("Não é possivel agendar uma consulta com o paciente inativo"));
         }
 
+        int hora = consulta.getDataHora().getHour();
+        if (hora <7 || hora >=19){
+            throw new RuntimeException("Horário indisponivel para Agendamento");
+        }
+
+        DayOfWeek diaSemana = consulta.getDataHora().getDayOfWeek();
+        if (diaSemana == DayOfWeek.SATURDAY || diaSemana == DayOfWeek.SUNDAY) {
+            throw new RuntimeException("Dia indisponivel para Agendamento");
+        }
     }
 }
