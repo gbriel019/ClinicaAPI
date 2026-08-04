@@ -1,6 +1,7 @@
 package com.clinica.api.controllers;
 
-import com.clinica.api.entities.Especialidade;
+import com.clinica.api.dto.request.EspecialidadeRequest;
+import com.clinica.api.dto.response.EspecialidadeResponse;
 import com.clinica.api.services.EspecialidadeService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -19,25 +20,25 @@ public class EspecialidadeController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Especialidade>> buscarTodos() {
+    public ResponseEntity<List<EspecialidadeResponse>> buscarTodos() {
         return ResponseEntity.ok(especialidadeService.buscarTodos());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Especialidade> buscarPorId(@PathVariable Long id) {
+    public ResponseEntity<EspecialidadeResponse> buscarPorId(@PathVariable Long id) {
         return ResponseEntity.ok(especialidadeService.buscarPorId(id));
     }
 
     @PostMapping
-    public ResponseEntity<Especialidade> salvar(@Valid @RequestBody Especialidade especialidade){
-        Especialidade especialidadeSalvo = especialidadeService.salvar(especialidade);
-        return ResponseEntity.ok(especialidadeSalvo);
+    public ResponseEntity<EspecialidadeResponse> salvar(@Valid @RequestBody EspecialidadeRequest request){
+        EspecialidadeResponse especialidadeSalva = especialidadeService.salvar(request);
+        return ResponseEntity.ok(especialidadeSalva);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Especialidade> atualizar(@PathVariable Long id, @Valid @RequestBody Especialidade especialidade) {
+    public ResponseEntity<EspecialidadeResponse> atualizar(@PathVariable Long id, @Valid @RequestBody EspecialidadeRequest request) {
 
-        Especialidade especialidadeAtualizada = especialidadeService.atualizar(id, especialidade);
+        EspecialidadeResponse especialidadeAtualizada = especialidadeService.atualizar(id, request);
         return ResponseEntity.ok(especialidadeAtualizada);
     }
 

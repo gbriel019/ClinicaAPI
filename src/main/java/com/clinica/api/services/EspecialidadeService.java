@@ -1,5 +1,7 @@
 package com.clinica.api.services;
 
+import com.clinica.api.dto.request.EspecialidadeRequest;
+import com.clinica.api.dto.response.EspecialidadeResponse;
 import com.clinica.api.entities.Especialidade;
 import com.clinica.api.repositories.EspecialidadeRepository;
 import org.springframework.stereotype.Service;
@@ -15,33 +17,50 @@ public class EspecialidadeService {
         this.especialidadeRepository = especialidadeRepository;
     }
 
-    public List<Especialidade> buscarTodos(){
-        return especialidadeRepository.findAll();
+    private EspecialidadeResponse converterParaResponse(Especialidade especialidade) {
+        EspecialidadeResponse response = new EspecialidadeResponse();
+        response.setId(especialidade.getId());
+        response.setNome(especialidade.getNome());
+
+        return response;
     }
 
-    public Especialidade buscarPorId(Long id) {
-        return especialidadeRepository.findById(id)
+    public List<EspecialidadeResponse> buscarTodos(){
+        return especialidadeRepository.findAll().stream().map(this::converterParaResponse).toList();
+    }
+
+    public EspecialidadeResponse buscarPorId(Long id) {
+        Especialidade especialidade = especialidadeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Especialidade não encontrada"));
+        return converterParaResponse(especialidade);
     }
 
-    public Especialidade salvar(Especialidade especialidade) {
-
+    public EspecialidadeResponse salvar(EspecialidadeRequest request) {
+        Especialidade especialidade = new Especialidade();
+        especialidade.setNome(request.getNome());
         if (especialidadeRepository.findByNome(especialidade.getNome()).isPresent()) {
             throw new RuntimeException("Já existe uma especialidade com esse nome");
         }
-        return especialidadeRepository.save(especialidade);
+        Especialidade especialidadeSalva = especialidadeRepository.save(especialidade);
+
+        return converterParaResponse(especialidadeSalva);
     }
 
-    public Especialidade atualizar(Long id, Especialidade especialidadeAtualizada) {
-        Especialidade especialidade = buscarPorId(id);
+    public EspecialidadeResponse atualizar(Long id, EspecialidadeRequest request) {
 
-        especialidade.setNome(especialidadeAtualizada.getNome());
+        Especialidade especialidade = especialidadeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Especialidade não encontrada"));
 
-        return especialidadeRepository.save(especialidade);
+        especialidade.setNome(request.getNome());
+
+        Especialidade especialidadeAtualizada = especialidadeRepository.save(especialidade);
+
+        return converterParaResponse(especialidadeAtualizada);
     }
 
     public void deletar(Long id){
-        Especialidade especialidade = buscarPorId(id);
+        Especialidade especialidade = especialidadeRepository.findById(id)
+                        .orElseThrow(() -> new RuntimeException("Especialidade não encontrada"));
         especialidadeRepository.delete(especialidade);
     }
 }
