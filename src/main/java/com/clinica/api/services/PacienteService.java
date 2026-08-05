@@ -1,5 +1,7 @@
 package com.clinica.api.services;
 
+import com.clinica.api.dto.request.PacienteRequest;
+import com.clinica.api.dto.response.PacienteResponse;
 import com.clinica.api.entities.Paciente;
 import com.clinica.api.repositories.PacienteRepository;
 import org.springframework.stereotype.Service;
@@ -15,34 +17,75 @@ public class PacienteService {
         this.pacienteRepository = pacienteRepository;
     }
 
-    public List<Paciente> buscarTodos(){
-        return pacienteRepository.findAll();
+    private PacienteResponse converterParaResponse(Paciente paciente) {
+
+
+        PacienteResponse response = new PacienteResponse();
+        response.setId(paciente.getId());
+        response.setNome(paciente.getNome());
+        response.setCpf(paciente.getCpf());
+        response.setEmail(paciente.getEmail());
+        response.setTelefone(paciente.getTelefone());
+        response.setDataNascimento(paciente.getDataNascimento());
+        response.setAtivo(paciente.getAtivo());
+
+        return response;
     }
 
-    public Paciente buscarPorId(Long id) {
-        return pacienteRepository.findById(id)
+    public List<PacienteResponse> buscarTodos(){
+        return pacienteRepository.findAll().stream().map(this::converterParaResponse).toList();
+    }
+
+    public PacienteResponse buscarPorId(Long id) {
+        Paciente paciente = pacienteRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Paciente não encontrado"));
+
+        return converterParaResponse(paciente);
     }
 
-    public Paciente salvar(Paciente paciente){
-        return pacienteRepository.save(paciente);
+    public PacienteResponse salvar(PacienteRequest request) {
+
+        if (pacienteRepository.findByCpf(request.getCpf()).isPresent()) {
+            throw new RuntimeException("Já existe um paciente com esse CPF");
+        }
+
+        if (pacienteRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new RuntimeException("Já existe um paciente com esse e-mail");
+        }
+
+        Paciente paciente = new Paciente();
+        paciente.setNome(request.getNome());
+        paciente.setCpf(request.getCpf());
+        paciente.setEmail(request.getEmail());
+        paciente.setTelefone(request.getTelefone());
+        paciente.setDataNascimento(request.getDataNascimento());
+
+
+
+        Paciente pacienteSalvo = pacienteRepository.save(paciente);
+
+        return converterParaResponse(pacienteSalvo);
     }
 
-    public Paciente atualizar(Long id, Paciente pacienteAtualizado) {
+    public PacienteResponse atualizar(Long id, PacienteRequest request) {
 
-        Paciente paciente = buscarPorId(id);
+        Paciente paciente = pacienteRepository.findById(id)
+                        .orElseThrow(() -> new RuntimeException("Paciente não encontrado"));
 
-        paciente.setNome(pacienteAtualizado.getNome());
-        paciente.setCpf(pacienteAtualizado.getCpf());
-        paciente.setEmail(pacienteAtualizado.getEmail());
-        paciente.setTelefone(pacienteAtualizado.getTelefone());
-        paciente.setDataNascimento(pacienteAtualizado.getDataNascimento());
+        paciente.setNome(request.getNome());
+        paciente.setCpf(request.getCpf());
+        paciente.setEmail(request.getEmail());
+        paciente.setTelefone(request.getTelefone());
+        paciente.setDataNascimento(request.getDataNascimento());
 
-        return pacienteRepository.save(paciente);
+        Paciente pacienteAtualizado = pacienteRepository.save(paciente);
+
+        return converterParaResponse(pacienteAtualizado);
     }
 
     public void deletar(Long id) {
-        Paciente paciente = buscarPorId(id);
+        Paciente paciente = pacienteRepository.findById(id)
+                        .orElseThrow(() -> new RuntimeException("Paciente não encontrado"));
 
         paciente.setAtivo(false);
 

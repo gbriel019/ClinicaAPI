@@ -2,7 +2,6 @@ package com.clinica.api.controllers;
 
 import com.clinica.api.dto.request.MedicoRequest;
 import com.clinica.api.dto.response.MedicoResponse;
-import com.clinica.api.entities.Medico;
 import com.clinica.api.services.MedicoService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
