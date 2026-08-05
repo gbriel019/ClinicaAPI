@@ -1,5 +1,8 @@
 package com.clinica.api.services;
 
+import com.clinica.api.dto.request.MedicoRequest;
+import com.clinica.api.dto.response.EspecialidadeResponse;
+import com.clinica.api.dto.response.MedicoResponse;
 import com.clinica.api.entities.Especialidade;
 import com.clinica.api.entities.Medico;
 import com.clinica.api.repositories.EspecialidadeRepository;
@@ -19,42 +22,74 @@ public class MedicoService {
         this.especialidadeRepository = especialidadeRepository;
     }
 
-    public List<Medico> buscarTodos(){
-        return medicoRepository.findAll();
+    private MedicoResponse converterParaResponse(Medico medico) {
+        EspecialidadeResponse especialidadeResponse = new EspecialidadeResponse();
+        especialidadeResponse.setId(medico.getEspecialidade().getId());
+        especialidadeResponse.setNome(medico.getEspecialidade().getNome());
+
+        MedicoResponse response = new MedicoResponse();
+        response.setId(medico.getId());
+        response.setNome(medico.getNome());
+        response.setCrm(medico.getCrm());
+        response.setEmail(medico.getEmail());
+        response.setTelefone(medico.getTelefone());
+        response.setEspecialidade(especialidadeResponse);
+        response.setAtivo(medico.getAtivo());
+
+        return response;
     }
 
-    public Medico buscarPorId(Long id) {
-        return medicoRepository.findById(id)
+    public List<MedicoResponse> buscarTodos(){
+        return medicoRepository.findAll().stream().map(this::converterParaResponse).toList();
+    }
+
+    public MedicoResponse buscarPorId(Long id) {
+
+        Medico medico = medicoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Médico não encontrado"));
+
+        return converterParaResponse(medico);
     }
 
-    public Medico salvar(Medico medico) {
+    public MedicoResponse salvar(MedicoRequest request) {
         Especialidade especialidade = especialidadeRepository
-                .findById(medico.getEspecialidade().getId())
+                .findById(request.getEspecialidadeId())
                 .orElseThrow(() -> new RuntimeException("Especialidade não encontrada"));
 
+        Medico medico = new Medico();
+        medico.setNome(request.getNome());
+        medico.setCrm(request.getCrm());
+        medico.setEmail(request.getEmail());
+        medico.setTelefone(request.getTelefone());
         medico.setEspecialidade(especialidade);
-        return medicoRepository.save(medico);
+
+        Medico medicoSalvo = medicoRepository.save(medico);
+
+        return converterParaResponse(medicoSalvo);
     }
 
-    public Medico atualizar(Long id, Medico medicoAtualizado) {
-        Medico medico = buscarPorId(id);
+    public MedicoResponse atualizar(Long id, MedicoRequest request) {
+        Medico medico = medicoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Medico não encontrado"));
 
         Especialidade especialidade = especialidadeRepository
-                .findById(medicoAtualizado.getEspecialidade().getId())
+                .findById(request.getEspecialidadeId())
                 .orElseThrow(() -> new RuntimeException("Especialidade não encontrada"));
 
-        medico.setNome(medicoAtualizado.getNome());
-        medico.setCrm(medicoAtualizado.getCrm());
-        medico.setEmail(medicoAtualizado.getEmail());
-        medico.setTelefone(medicoAtualizado.getTelefone());
+
+        medico.setNome(request.getNome());
+        medico.setCrm(request.getCrm());
+        medico.setEmail(request.getEmail());
+        medico.setTelefone(request.getTelefone());
         medico.setEspecialidade(especialidade);
 
-        return medicoRepository.save(medico);
+        Medico medicoAtualizado = medicoRepository.save(medico);
+        return converterParaResponse(medicoAtualizado);
     }
 
     public void deletar(Long id) {
-        Medico medico = buscarPorId(id);
+        Medico medico = medicoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Medico não encontrado"));
 
         medico.setAtivo(false);
 

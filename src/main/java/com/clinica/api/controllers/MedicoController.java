@@ -1,5 +1,7 @@
 package com.clinica.api.controllers;
 
+import com.clinica.api.dto.request.MedicoRequest;
+import com.clinica.api.dto.response.MedicoResponse;
 import com.clinica.api.entities.Medico;
 import com.clinica.api.services.MedicoService;
 import jakarta.validation.Valid;
@@ -19,25 +21,25 @@ public class MedicoController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Medico>> buscarTodos(){
+    public ResponseEntity<List<MedicoResponse>> buscarTodos(){
         return ResponseEntity.ok(medicoService.buscarTodos());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Medico> buscarPorId(@PathVariable Long id) {
+    public ResponseEntity<MedicoResponse> buscarPorId(@PathVariable Long id) {
         return ResponseEntity.ok(medicoService.buscarPorId(id));
     }
 
     @PostMapping
-    public ResponseEntity<Medico> salvar(@Valid @RequestBody Medico medico){
-        Medico medicoSalvo = medicoService.salvar(medico);
+    public ResponseEntity<MedicoResponse> salvar(@Valid @RequestBody MedicoRequest request){
+        MedicoResponse medicoSalvo = medicoService.salvar(request);
         return ResponseEntity.ok(medicoSalvo);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Medico> atualizar(@PathVariable Long id, @Valid @RequestBody Medico medico){
+    public ResponseEntity<MedicoResponse> atualizar(@PathVariable Long id, @Valid @RequestBody MedicoRequest request){
 
-        Medico medicoAtualizado = medicoService.atualizar(id, medico);
+        MedicoResponse medicoAtualizado = medicoService.atualizar(id, request);
         return ResponseEntity.ok(medicoAtualizado);
     }
 
