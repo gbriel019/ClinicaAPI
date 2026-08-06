@@ -1,6 +1,7 @@
 package com.clinica.api.services;
 
-
+import com.clinica.api.dto.request.UsuarioRequest;
+import com.clinica.api.dto.response.UsuarioResponse;
 import com.clinica.api.entities.Usuario;
 import com.clinica.api.repositories.UsuarioRepository;
 import org.springframework.stereotype.Service;
@@ -16,35 +17,61 @@ public class UsuarioService {
         this.usuarioRepository = usuarioRepository;
     }
 
-    public List<Usuario> buscarTodos(){
-        return usuarioRepository.findAll();
+    private UsuarioResponse converterParaResponse(Usuario usuario) {
+
+        UsuarioResponse response = new UsuarioResponse();
+        response.setId(usuario.getId());
+        response.setNome(usuario.getNome());
+        response.setEmail(usuario.getEmail());
+        response.setRole(usuario.getRole());
+        response.setAtivo(usuario.getAtivo());
+
+        return response;
     }
 
-    public Usuario buscarPorId(Long id) {
-        return usuarioRepository.findById(id)
+    public List<UsuarioResponse> buscarTodos(){
+        return usuarioRepository.findAll().stream().map(this::converterParaResponse).toList();
+    }
+
+    public UsuarioResponse buscarPorId(Long id) {
+        Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrada"));
+
+        return converterParaResponse(usuario);
     }
 
-    public Usuario salvar(Usuario usuario){
-        if (usuarioRepository.findByEmail(usuario.getEmail()).isPresent()){
+    public UsuarioResponse salvar(UsuarioRequest request){
+
+        if (usuarioRepository.findByEmail(request.getEmail()).isPresent()){
             throw new RuntimeException("Já existe um usuário com este e-mail");
         }
-        return usuarioRepository.save(usuario);
+
+        Usuario usuario = new Usuario();
+        usuario.setNome(request.getNome());
+        usuario.setEmail(request.getEmail());
+        usuario.setRole(request.getRole());
+        usuario.setAtivo(request.getAtivo());
+
+        Usuario usuarioSalvo = usuarioRepository.save(usuario);
+        return converterParaResponse(usuarioSalvo);
     }
 
-    public Usuario atualizar(Long id, Usuario usuarioAtualizado){
-        Usuario usuario = buscarPorId(id);
+    public UsuarioResponse atualizar(Long id, UsuarioRequest request){
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario não encontrado"));
 
-        usuario.setNome(usuarioAtualizado.getNome());
-        usuario.setEmail(usuarioAtualizado.getEmail());
-        usuario.setSenha(usuarioAtualizado.getSenha());
-        usuario.setRole(usuarioAtualizado.getRole());
+        usuario.setNome(request.getNome());
+        usuario.setEmail(request.getEmail());
+        usuario.setRole(request.getRole());
+        usuario.setAtivo(request.getAtivo());
 
-        return usuarioRepository.save(usuario);
+        Usuario usuarioAtualizado = usuarioRepository.save(usuario);
+        return converterParaResponse(usuarioAtualizado);
     }
 
     public void deletar(Long id){
-        Usuario usuario = buscarPorId(id);
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuáio não encontrado"));
 
         usuario.setAtivo(false);
 

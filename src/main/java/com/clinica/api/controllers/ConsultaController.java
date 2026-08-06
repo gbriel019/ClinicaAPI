@@ -1,8 +1,11 @@
 package com.clinica.api.controllers;
 
-import com.clinica.api.entities.Consulta;
+import com.clinica.api.dto.request.CancelarConsultaRequest;
+import com.clinica.api.dto.request.ConsultaRequest;
+import com.clinica.api.dto.response.ConsultaResponse;
 import com.clinica.api.services.ConsultaService;
 import jakarta.validation.Valid;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,25 +23,26 @@ public class ConsultaController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Consulta>> buscarTodos() {
+    public ResponseEntity<List<ConsultaResponse>> buscarTodos() {
         return ResponseEntity.ok(consultaService.buscarTodos());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Consulta> buscarPorId(@PathVariable Long id) {
+    @Cacheable
+    public ResponseEntity<ConsultaResponse> buscarPorId(@PathVariable Long id) {
         return ResponseEntity.ok(consultaService.buscarPorId(id));
     }
 
     @PostMapping
-    public ResponseEntity<Consulta> salvar(@Valid @RequestBody Consulta consulta){
-        Consulta consultaSalva = consultaService.salvar(consulta);
+    public ResponseEntity<ConsultaResponse> salvar(@Valid @RequestBody ConsultaRequest request){
+        ConsultaResponse consultaSalva = consultaService.salvar(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(consultaSalva);
     }
 
     @PutMapping("/{id}/cancelar")
-    public ResponseEntity<Consulta> cancelar(@PathVariable Long id, @RequestParam String motivo) {
+    public ResponseEntity<ConsultaResponse> cancelar(@PathVariable Long id, @RequestParam CancelarConsultaRequest request) {
 
-        Consulta consultaCancelada = consultaService.cancelar(id, motivo);
+        ConsultaResponse consultaCancelada = consultaService.cancelar(id, request);
         return ResponseEntity.ok(consultaCancelada);
     }
 
