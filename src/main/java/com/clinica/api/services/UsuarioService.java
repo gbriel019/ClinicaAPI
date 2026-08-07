@@ -4,6 +4,8 @@ import com.clinica.api.dto.request.UsuarioRequest;
 import com.clinica.api.dto.response.UsuarioResponse;
 import com.clinica.api.entities.Usuario;
 import com.clinica.api.repositories.UsuarioRepository;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,14 +27,17 @@ public class UsuarioService {
         response.setEmail(usuario.getEmail());
         response.setRole(usuario.getRole());
         response.setAtivo(usuario.getAtivo());
+        usuario.setSenha(usuario.getSenha());
 
         return response;
     }
 
+    @Cacheable("usuarios")
     public List<UsuarioResponse> buscarTodos(){
         return usuarioRepository.findAll().stream().map(this::converterParaResponse).toList();
     }
 
+    @Cacheable(value = "usuario", key = "#id")
     public UsuarioResponse buscarPorId(Long id) {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrada"));
@@ -40,6 +45,7 @@ public class UsuarioService {
         return converterParaResponse(usuario);
     }
 
+    @CacheEvict(value = {"usuarios", "usuario"}, allEntries = true)
     public UsuarioResponse salvar(UsuarioRequest request){
 
         if (usuarioRepository.findByEmail(request.getEmail()).isPresent()){
@@ -56,6 +62,7 @@ public class UsuarioService {
         return converterParaResponse(usuarioSalvo);
     }
 
+    @CacheEvict(value = {"usuarios", "usuario"}, allEntries = true)
     public UsuarioResponse atualizar(Long id, UsuarioRequest request){
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuario não encontrado"));
@@ -69,6 +76,7 @@ public class UsuarioService {
         return converterParaResponse(usuarioAtualizado);
     }
 
+    @CacheEvict(value = {"usuarios", "usuario"}, allEntries = true)
     public void deletar(Long id){
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuáio não encontrado"));

@@ -21,7 +21,6 @@ public class UsuarioRequest {
     @NotBlank(message = "O campo Senha é obrigatório")
     private String senha;
 
-    @Enumerated(EnumType.STRING)
     private Role role;
 
     private Boolean ativo = true;

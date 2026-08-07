@@ -4,6 +4,8 @@ import com.clinica.api.dto.request.EspecialidadeRequest;
 import com.clinica.api.dto.response.EspecialidadeResponse;
 import com.clinica.api.entities.Especialidade;
 import com.clinica.api.repositories.EspecialidadeRepository;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,17 +26,19 @@ public class EspecialidadeService {
 
         return response;
     }
-
+    @Cacheable("especialidades")
     public List<EspecialidadeResponse> buscarTodos(){
         return especialidadeRepository.findAll().stream().map(this::converterParaResponse).toList();
     }
 
+    @Cacheable(value = "especialidade", key = "#id")
     public EspecialidadeResponse buscarPorId(Long id) {
         Especialidade especialidade = especialidadeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Especialidade não encontrada"));
         return converterParaResponse(especialidade);
     }
 
+    @CacheEvict(value = {"especialidades", "especialidade"}, allEntries = true)
     public EspecialidadeResponse salvar(EspecialidadeRequest request) {
         Especialidade especialidade = new Especialidade();
         especialidade.setNome(request.getNome());
@@ -46,6 +50,7 @@ public class EspecialidadeService {
         return converterParaResponse(especialidadeSalva);
     }
 
+    @CacheEvict(value = {"especialidades", "especialidade"}, allEntries = true)
     public EspecialidadeResponse atualizar(Long id, EspecialidadeRequest request) {
 
         Especialidade especialidade = especialidadeRepository.findById(id)
@@ -58,6 +63,7 @@ public class EspecialidadeService {
         return converterParaResponse(especialidadeAtualizada);
     }
 
+    @CacheEvict(value = {"especialidades", "especialidade"}, allEntries = true)
     public void deletar(Long id){
         Especialidade especialidade = especialidadeRepository.findById(id)
                         .orElseThrow(() -> new RuntimeException("Especialidade não encontrada"));

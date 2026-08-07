@@ -1,4 +1,4 @@
-package com.clinica.api.config;
+package com.clinica.api.config.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

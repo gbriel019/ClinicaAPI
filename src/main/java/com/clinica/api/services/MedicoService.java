@@ -7,6 +7,8 @@ import com.clinica.api.entities.Especialidade;
 import com.clinica.api.entities.Medico;
 import com.clinica.api.repositories.EspecialidadeRepository;
 import com.clinica.api.repositories.MedicoRepository;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -39,10 +41,12 @@ public class MedicoService {
         return response;
     }
 
+    @Cacheable("medicos")
     public List<MedicoResponse> buscarTodos(){
         return medicoRepository.findAll().stream().map(this::converterParaResponse).toList();
     }
 
+    @Cacheable(value = "medico", key = "#id")
     public MedicoResponse buscarPorId(Long id) {
 
         Medico medico = medicoRepository.findById(id)
@@ -51,6 +55,7 @@ public class MedicoService {
         return converterParaResponse(medico);
     }
 
+    @CacheEvict(value = {"medicos", "medico"}, allEntries = true)
     public MedicoResponse salvar(MedicoRequest request) {
         Especialidade especialidade = especialidadeRepository
                 .findById(request.getEspecialidadeId())
@@ -68,6 +73,7 @@ public class MedicoService {
         return converterParaResponse(medicoSalvo);
     }
 
+    @CacheEvict(value = {"medicos", "medico"}, allEntries = true)
     public MedicoResponse atualizar(Long id, MedicoRequest request) {
         Medico medico = medicoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Medico não encontrado"));
@@ -87,6 +93,7 @@ public class MedicoService {
         return converterParaResponse(medicoAtualizado);
     }
 
+    @CacheEvict(value = {"medicos", "medico"}, allEntries = true)
     public void deletar(Long id) {
         Medico medico = medicoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Medico não encontrado"));

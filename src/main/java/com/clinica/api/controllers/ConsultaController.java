@@ -5,7 +5,6 @@ import com.clinica.api.dto.request.ConsultaRequest;
 import com.clinica.api.dto.response.ConsultaResponse;
 import com.clinica.api.services.ConsultaService;
 import jakarta.validation.Valid;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +27,6 @@ public class ConsultaController {
     }
 
     @GetMapping("/{id}")
-    @Cacheable
     public ResponseEntity<ConsultaResponse> buscarPorId(@PathVariable Long id) {
         return ResponseEntity.ok(consultaService.buscarPorId(id));
     }
@@ -40,7 +38,7 @@ public class ConsultaController {
     }
 
     @PutMapping("/{id}/cancelar")
-    public ResponseEntity<ConsultaResponse> cancelar(@PathVariable Long id, @RequestParam CancelarConsultaRequest request) {
+    public ResponseEntity<ConsultaResponse> cancelar(@PathVariable Long id, @RequestBody CancelarConsultaRequest request) {
 
         ConsultaResponse consultaCancelada = consultaService.cancelar(id, request);
         return ResponseEntity.ok(consultaCancelada);

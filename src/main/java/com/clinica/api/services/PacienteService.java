@@ -4,6 +4,8 @@ import com.clinica.api.dto.request.PacienteRequest;
 import com.clinica.api.dto.response.PacienteResponse;
 import com.clinica.api.entities.Paciente;
 import com.clinica.api.repositories.PacienteRepository;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -32,10 +34,12 @@ public class PacienteService {
         return response;
     }
 
+    @Cacheable("pacientes")
     public List<PacienteResponse> buscarTodos(){
         return pacienteRepository.findAll().stream().map(this::converterParaResponse).toList();
     }
 
+    @Cacheable(value = "paciente", key = "#id")
     public PacienteResponse buscarPorId(Long id) {
         Paciente paciente = pacienteRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Paciente não encontrado"));
@@ -43,6 +47,7 @@ public class PacienteService {
         return converterParaResponse(paciente);
     }
 
+    @CacheEvict(value = {"pacientes", "paciente"}, allEntries = true)
     public PacienteResponse salvar(PacienteRequest request) {
 
         if (pacienteRepository.findByCpf(request.getCpf()).isPresent()) {
@@ -67,6 +72,7 @@ public class PacienteService {
         return converterParaResponse(pacienteSalvo);
     }
 
+    @CacheEvict(value = {"pacientes", "paciente"}, allEntries = true)
     public PacienteResponse atualizar(Long id, PacienteRequest request) {
 
         Paciente paciente = pacienteRepository.findById(id)
@@ -83,6 +89,7 @@ public class PacienteService {
         return converterParaResponse(pacienteAtualizado);
     }
 
+    @CacheEvict(value = {"pacientes", "paciente"}, allEntries = true)
     public void deletar(Long id) {
         Paciente paciente = pacienteRepository.findById(id)
                         .orElseThrow(() -> new RuntimeException("Paciente não encontrado"));

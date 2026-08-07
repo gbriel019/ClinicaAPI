@@ -13,6 +13,7 @@ import com.clinica.api.exception.NotFound;
 import com.clinica.api.repositories.ConsultaRepository;
 import com.clinica.api.repositories.MedicoRepository;
 import com.clinica.api.repositories.PacienteRepository;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -34,7 +35,6 @@ public class ConsultaService {
         this.pacienteRepository = pacienteRepository;
     }
 
-    @CachePut(value = "consultaCache", key = "#command.getId()")
 
     private ConsultaResponse converterParaResponse(Consulta consulta) {
         ConsultaResponse response = new ConsultaResponse();
@@ -50,10 +50,12 @@ public class ConsultaService {
         return response;
     }
 
+    @Cacheable("consultas")
     public List<ConsultaResponse> buscarTodos(){
         return consultaRepository.findAll().stream().map(this::converterParaResponse).toList();
     }
 
+    @Cacheable(value = "consulta", key = "#id")
     public ConsultaResponse buscarPorId(Long id){
         Consulta consulta = consultaRepository.findById(id)
                 .orElseThrow(() -> new NotFound("Consulta não encontrada"));
@@ -61,6 +63,7 @@ public class ConsultaService {
         return converterParaResponse(consulta);
     }
 
+    @CacheEvict(value = {"consultas" , "consulta"}, allEntries = true)
     public ConsultaResponse salvar(ConsultaRequest request) {
         Medico medico = medicoRepository.findById(request.getMedicoId())
                 .orElseThrow(() -> new NotFound("Médico não encontrado"));
@@ -107,6 +110,7 @@ public class ConsultaService {
         return converterParaResponse(consultaSalva);
     }
 
+    @CacheEvict(value = {"especialidades", "especialidade"}, allEntries = true)
     public ConsultaResponse cancelar(Long id, CancelarConsultaRequest request) {
         Consulta consulta = consultaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Consulta não encontrada"));
