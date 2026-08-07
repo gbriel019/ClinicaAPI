@@ -2,6 +2,8 @@ package com.clinica.api.services;
 
 import java.time.DayOfWeek;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.clinica.api.dto.request.CancelarConsultaRequest;
 import com.clinica.api.dto.request.ConsultaRequest;
 import com.clinica.api.dto.response.ConsultaResponse;
@@ -14,7 +16,6 @@ import com.clinica.api.repositories.ConsultaRepository;
 import com.clinica.api.repositories.MedicoRepository;
 import com.clinica.api.repositories.PacienteRepository;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +26,7 @@ import java.util.List;
 @Service
 public class ConsultaService {
 
+
     private final ConsultaRepository consultaRepository;
     private final MedicoRepository medicoRepository;
     private final PacienteRepository pacienteRepository;
@@ -34,6 +36,8 @@ public class ConsultaService {
         this.medicoRepository = medicoRepository;
         this.pacienteRepository = pacienteRepository;
     }
+
+    private static final Logger log = LoggerFactory.getLogger(ConsultaService.class);
 
 
     private ConsultaResponse converterParaResponse(Consulta consulta) {
@@ -52,11 +56,13 @@ public class ConsultaService {
 
     @Cacheable("consultas")
     public List<ConsultaResponse> buscarTodos(){
+        log.info("Buscando todas as consultas");
         return consultaRepository.findAll().stream().map(this::converterParaResponse).toList();
     }
 
     @Cacheable(value = "consulta", key = "#id")
     public ConsultaResponse buscarPorId(Long id){
+        log.info("Buscando consulta com ID {}", id);
         Consulta consulta = consultaRepository.findById(id)
                 .orElseThrow(() -> new NotFound("Consulta não encontrada"));
 
@@ -65,6 +71,8 @@ public class ConsultaService {
 
     @CacheEvict(value = {"consultas" , "consulta"}, allEntries = true)
     public ConsultaResponse salvar(ConsultaRequest request) {
+        log.info("Cadastrando nova consulta para o médico {} e paciente {}",
+                request.getMedicoId(), request.getPacienteId());
         Medico medico = medicoRepository.findById(request.getMedicoId())
                 .orElseThrow(() -> new NotFound("Médico não encontrado"));
 
@@ -110,8 +118,9 @@ public class ConsultaService {
         return converterParaResponse(consultaSalva);
     }
 
-    @CacheEvict(value = {"especialidades", "especialidade"}, allEntries = true)
+    @CacheEvict(value = {"consultas", "consulta"}, allEntries = true)
     public ConsultaResponse cancelar(Long id, CancelarConsultaRequest request) {
+        log.info("Cancelando consulta com ID {}", id);
         Consulta consulta = consultaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Consulta não encontrada"));
 
