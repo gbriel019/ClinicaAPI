@@ -1,7 +1,6 @@
 package com.clinica.api.dto.request;
 
 import com.clinica.api.enums.Role;
-import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
