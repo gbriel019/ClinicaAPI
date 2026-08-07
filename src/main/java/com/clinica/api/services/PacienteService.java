@@ -1,5 +1,7 @@
 package com.clinica.api.services;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.clinica.api.dto.request.PacienteRequest;
 import com.clinica.api.dto.response.PacienteResponse;
 import com.clinica.api.entities.Paciente;
@@ -19,6 +21,8 @@ public class PacienteService {
         this.pacienteRepository = pacienteRepository;
     }
 
+    private static final Logger log = LoggerFactory.getLogger(PacienteService.class);
+
     private PacienteResponse converterParaResponse(Paciente paciente) {
 
 
@@ -36,11 +40,13 @@ public class PacienteService {
 
     @Cacheable("pacientes")
     public List<PacienteResponse> buscarTodos(){
+        log.info("Buscando todos pacientes");
         return pacienteRepository.findAll().stream().map(this::converterParaResponse).toList();
     }
 
     @Cacheable(value = "paciente", key = "#id")
     public PacienteResponse buscarPorId(Long id) {
+        log.info("Buscando paciente com ID {}", id);
         Paciente paciente = pacienteRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Paciente não encontrado"));
 
@@ -49,6 +55,7 @@ public class PacienteService {
 
     @CacheEvict(value = {"pacientes", "paciente"}, allEntries = true)
     public PacienteResponse salvar(PacienteRequest request) {
+        log.info("Salvando paciente com CPF {}", request.getCpf());
 
         if (pacienteRepository.findByCpf(request.getCpf()).isPresent()) {
             throw new RuntimeException("Já existe um paciente com esse CPF");
@@ -69,11 +76,14 @@ public class PacienteService {
 
         Paciente pacienteSalvo = pacienteRepository.save(paciente);
 
+        log.info("Paciente salvo com sucesso ID {}", pacienteSalvo.getId());
+
         return converterParaResponse(pacienteSalvo);
     }
 
     @CacheEvict(value = {"pacientes", "paciente"}, allEntries = true)
     public PacienteResponse atualizar(Long id, PacienteRequest request) {
+        log.info("Atualizando paciente com ID {}", id);
 
         Paciente paciente = pacienteRepository.findById(id)
                         .orElseThrow(() -> new RuntimeException("Paciente não encontrado"));
@@ -91,6 +101,7 @@ public class PacienteService {
 
     @CacheEvict(value = {"pacientes", "paciente"}, allEntries = true)
     public void deletar(Long id) {
+        log.info("Deletando paciente com ID {}", id);
         Paciente paciente = pacienteRepository.findById(id)
                         .orElseThrow(() -> new RuntimeException("Paciente não encontrado"));
 

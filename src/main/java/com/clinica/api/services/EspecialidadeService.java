@@ -1,5 +1,7 @@
 package com.clinica.api.services;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.clinica.api.dto.request.EspecialidadeRequest;
 import com.clinica.api.dto.response.EspecialidadeResponse;
 import com.clinica.api.entities.Especialidade;
@@ -19,6 +21,8 @@ public class EspecialidadeService {
         this.especialidadeRepository = especialidadeRepository;
     }
 
+    private static final Logger log = LoggerFactory.getLogger(EspecialidadeService.class);
+
     private EspecialidadeResponse converterParaResponse(Especialidade especialidade) {
         EspecialidadeResponse response = new EspecialidadeResponse();
         response.setId(especialidade.getId());
@@ -28,11 +32,13 @@ public class EspecialidadeService {
     }
     @Cacheable("especialidades")
     public List<EspecialidadeResponse> buscarTodos(){
+        log.info("Buscando todas as especialidades");
         return especialidadeRepository.findAll().stream().map(this::converterParaResponse).toList();
     }
 
     @Cacheable(value = "especialidade", key = "#id")
     public EspecialidadeResponse buscarPorId(Long id) {
+        log.info("Buscando especialidade com ID {}", id);
         Especialidade especialidade = especialidadeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Especialidade não encontrada"));
         return converterParaResponse(especialidade);
@@ -40,6 +46,7 @@ public class EspecialidadeService {
 
     @CacheEvict(value = {"especialidades", "especialidade"}, allEntries = true)
     public EspecialidadeResponse salvar(EspecialidadeRequest request) {
+        log.info("Cadastrando nova especialidade {}", request.getNome());
         Especialidade especialidade = new Especialidade();
         especialidade.setNome(request.getNome());
         if (especialidadeRepository.findByNome(especialidade.getNome()).isPresent()) {
@@ -52,6 +59,7 @@ public class EspecialidadeService {
 
     @CacheEvict(value = {"especialidades", "especialidade"}, allEntries = true)
     public EspecialidadeResponse atualizar(Long id, EspecialidadeRequest request) {
+        log.info("Atualizando especialidade {}", id);
 
         Especialidade especialidade = especialidadeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Especialidade não encontrada"));
@@ -65,6 +73,7 @@ public class EspecialidadeService {
 
     @CacheEvict(value = {"especialidades", "especialidade"}, allEntries = true)
     public void deletar(Long id){
+        log.info("Deletando especialidade com o ID {}", id);
         Especialidade especialidade = especialidadeRepository.findById(id)
                         .orElseThrow(() -> new RuntimeException("Especialidade não encontrada"));
         especialidadeRepository.delete(especialidade);
