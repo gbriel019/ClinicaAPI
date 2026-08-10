@@ -8,6 +8,7 @@ import com.clinica.api.entities.Usuario;
 import com.clinica.api.repositories.UsuarioRepository;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,13 +16,17 @@ import java.util.List;
 @Service
 public class UsuarioService {
 
+    private final PasswordEncoder passwordEncoder;
+
+
     private final UsuarioRepository usuarioRepository;
 
-    public UsuarioService(UsuarioRepository usuarioRepository) {
+    public UsuarioService(PasswordEncoder passwordEncoder, UsuarioRepository usuarioRepository) {
+        this.passwordEncoder = passwordEncoder;
         this.usuarioRepository = usuarioRepository;
     }
 
-    private static final Logger log = LoggerFactory.getLogger(ConsultaService.class);
+    private static final Logger log = LoggerFactory.getLogger(UsuarioService.class);
 
     private UsuarioResponse converterParaResponse(Usuario usuario) {
 
@@ -31,7 +36,7 @@ public class UsuarioService {
         response.setEmail(usuario.getEmail());
         response.setRole(usuario.getRole());
         response.setAtivo(usuario.getAtivo());
-        usuario.setSenha(usuario.getSenha());
+
 
         return response;
     }
@@ -77,8 +82,10 @@ public class UsuarioService {
 
         usuario.setNome(request.getNome());
         usuario.setEmail(request.getEmail());
+        usuario.setSenha(passwordEncoder.encode(request.getSenha()));
         usuario.setRole(request.getRole());
         usuario.setAtivo(request.getAtivo());
+
 
         Usuario usuarioAtualizado = usuarioRepository.save(usuario);
         return converterParaResponse(usuarioAtualizado);
