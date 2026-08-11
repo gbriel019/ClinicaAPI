@@ -31,7 +31,8 @@ public class SecurityConfig {
                 )
 
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll()
+                        .requestMatchers("/auth/**").permitAll()
+                        .anyRequest().authenticated()
                 )
 
                 .addFilterBefore(
@@ -52,14 +53,6 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
-    }
-
-    // TEMPORÁRIO: apenas para gerar o hash da senha (depois eu tenho que tirar)
-    @Bean
-    public String gerarHash() {
-        String hash = passwordEncoder().encode("123456");
-        System.out.println("HASH DA SENHA: " + hash);
-        return hash;
     }
 }
 
