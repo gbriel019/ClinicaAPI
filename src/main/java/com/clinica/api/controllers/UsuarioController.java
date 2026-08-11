@@ -33,7 +33,11 @@ public class UsuarioController {
 
     @PostMapping
     public ResponseEntity<UsuarioResponse> salvar(@Valid @RequestBody UsuarioRequest request) {
+
+        System.out.println(">>> CHEGOU NO POST /usuarios");
+
         UsuarioResponse usuarioSalvo = usuarioService.salvar(request);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(usuarioSalvo);
     }
 

@@ -57,20 +57,25 @@ public class UsuarioService {
     }
 
     @CacheEvict(value = {"usuarios", "usuario"}, allEntries = true)
-    public UsuarioResponse salvar(UsuarioRequest request){
+    public UsuarioResponse salvar(UsuarioRequest request) {
         log.info("Salvando usuario com email {}", request.getEmail());
 
-        if (usuarioRepository.findByEmail(request.getEmail()).isPresent()){
+        if (usuarioRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new RuntimeException("Já existe um usuário com este e-mail");
         }
 
         Usuario usuario = new Usuario();
         usuario.setNome(request.getNome());
         usuario.setEmail(request.getEmail());
+
+        // Criptografa a senha antes de salvar
+        usuario.setSenha(passwordEncoder.encode(request.getSenha()));
+
         usuario.setRole(request.getRole());
         usuario.setAtivo(request.getAtivo());
 
         Usuario usuarioSalvo = usuarioRepository.save(usuario);
+
         return converterParaResponse(usuarioSalvo);
     }
 
