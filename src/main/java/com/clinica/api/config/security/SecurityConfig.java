@@ -75,6 +75,21 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/medicos/**")
                         .hasRole("ADMIN")
 
+                        // Especialidades
+                        .requestMatchers(HttpMethod.GET, "/especialidades/**")
+                        .hasAnyRole("ADMIN", "RECEPCIONISTA", "MEDICO")
+
+                        .requestMatchers(HttpMethod.POST, "/especialidades")
+                        .hasRole("ADMIN")
+
+                        .requestMatchers(HttpMethod.PUT, "/especialidades/**")
+                        .hasRole("ADMIN")
+
+                        .requestMatchers(HttpMethod.DELETE, "/especialidades/**")
+                        .hasRole("ADMIN")
+
+
+
                         // Demais endpoints
                         .anyRequest().authenticated()
                 )
