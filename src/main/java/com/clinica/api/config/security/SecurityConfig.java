@@ -33,10 +33,11 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
 
-                        // Login
+                        // LOGIN
                         .requestMatchers("/auth/**").permitAll()
 
-                        // Usuários
+
+                        // USUÁRIOS
                         .requestMatchers(HttpMethod.GET, "/usuarios/**")
                         .authenticated()
 
@@ -49,7 +50,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/usuarios/**")
                         .hasRole("ADMIN")
 
-                        // Pacientes
+
+                        // PACIENTES
                         .requestMatchers(HttpMethod.GET, "/pacientes/**")
                         .hasAnyRole("ADMIN", "RECEPCIONISTA", "MEDICO")
 
@@ -62,7 +64,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/pacientes/**")
                         .hasRole("ADMIN")
 
-                        // Medicos
+
+                        // MÉDICOS
                         .requestMatchers(HttpMethod.GET, "/medicos/**")
                         .hasAnyRole("ADMIN", "RECEPCIONISTA", "MEDICO")
 
@@ -75,7 +78,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/medicos/**")
                         .hasRole("ADMIN")
 
-                        // Especialidades
+
+
+                        // ESPECIALIDADES
                         .requestMatchers(HttpMethod.GET, "/especialidades/**")
                         .hasAnyRole("ADMIN", "RECEPCIONISTA", "MEDICO")
 
@@ -89,8 +94,18 @@ public class SecurityConfig {
                         .hasRole("ADMIN")
 
 
+                        // CONSULTAS
+                        .requestMatchers(HttpMethod.GET, "/consultas/**")
+                        .hasAnyRole("ADMIN", "RECEPCIONISTA", "MEDICO")
 
-                        // Demais endpoints
+                        .requestMatchers(HttpMethod.POST, "/consultas")
+                        .hasAnyRole("ADMIN", "RECEPCIONISTA")
+
+                        .requestMatchers(HttpMethod.PUT, "/consultas/*/cancelar")
+                        .hasAnyRole("ADMIN", "RECEPCIONISTA")
+
+
+                        // OUTROS ENDPOINTS
                         .anyRequest().authenticated()
                 )
 
@@ -114,4 +129,3 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 }
-
