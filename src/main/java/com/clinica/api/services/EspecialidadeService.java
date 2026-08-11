@@ -1,5 +1,6 @@
 package com.clinica.api.services;
 
+import com.clinica.api.exception.NotFound;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.clinica.api.dto.request.EspecialidadeRequest;
@@ -40,7 +41,7 @@ public class EspecialidadeService {
     public EspecialidadeResponse buscarPorId(Long id) {
         log.info("Buscando especialidade com ID {}", id);
         Especialidade especialidade = especialidadeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Especialidade não encontrada"));
+                .orElseThrow(() -> new NotFound("Especialidade não encontrada"));
         return converterParaResponse(especialidade);
     }
 
@@ -62,7 +63,7 @@ public class EspecialidadeService {
         log.info("Atualizando especialidade {}", id);
 
         Especialidade especialidade = especialidadeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Especialidade não encontrada"));
+                .orElseThrow(() -> new NotFound("Especialidade não encontrada"));
 
         especialidade.setNome(request.getNome());
 
@@ -75,7 +76,7 @@ public class EspecialidadeService {
     public void deletar(Long id){
         log.info("Deletando especialidade com o ID {}", id);
         Especialidade especialidade = especialidadeRepository.findById(id)
-                        .orElseThrow(() -> new RuntimeException("Especialidade não encontrada"));
+                        .orElseThrow(() -> new NotFound("Especialidade não encontrada"));
         especialidadeRepository.delete(especialidade);
     }
 }

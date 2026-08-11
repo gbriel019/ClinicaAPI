@@ -1,5 +1,6 @@
 package com.clinica.api.services;
 
+import com.clinica.api.exception.NotFound;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.clinica.api.dto.request.PacienteRequest;
@@ -48,7 +49,7 @@ public class PacienteService {
     public PacienteResponse buscarPorId(Long id) {
         log.info("Buscando paciente com ID {}", id);
         Paciente paciente = pacienteRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Paciente não encontrado"));
+                .orElseThrow(() -> new NotFound("Paciente não encontrado"));
 
         return converterParaResponse(paciente);
     }
@@ -86,7 +87,7 @@ public class PacienteService {
         log.info("Atualizando paciente com ID {}", id);
 
         Paciente paciente = pacienteRepository.findById(id)
-                        .orElseThrow(() -> new RuntimeException("Paciente não encontrado"));
+                        .orElseThrow(() -> new NotFound("Paciente não encontrado"));
 
         paciente.setNome(request.getNome());
         paciente.setCpf(request.getCpf());
@@ -103,7 +104,7 @@ public class PacienteService {
     public void deletar(Long id) {
         log.info("Deletando paciente com ID {}", id);
         Paciente paciente = pacienteRepository.findById(id)
-                        .orElseThrow(() -> new RuntimeException("Paciente não encontrado"));
+                        .orElseThrow(() -> new NotFound("Paciente não encontrado"));
 
         paciente.setAtivo(false);
 

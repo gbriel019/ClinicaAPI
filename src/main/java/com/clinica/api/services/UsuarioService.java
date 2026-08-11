@@ -1,5 +1,6 @@
 package com.clinica.api.services;
 
+import com.clinica.api.exception.NotFound;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.clinica.api.dto.request.UsuarioRequest;
@@ -83,7 +84,7 @@ public class UsuarioService {
     public UsuarioResponse atualizar(Long id, UsuarioRequest request){
         log.info("Atualizando usuario com ID {}", id);
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario não encontrado"));
+                .orElseThrow(() -> new NotFound("Usuario não encontrado"));
 
         usuario.setNome(request.getNome());
         usuario.setEmail(request.getEmail());
@@ -100,7 +101,7 @@ public class UsuarioService {
     public void deletar(Long id){
         log.info("Deletando usuario com ID {}", id);
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuáio não encontrado"));
+                .orElseThrow(() -> new NotFound("Usuáio não encontrado"));
 
         usuario.setAtivo(false);
 

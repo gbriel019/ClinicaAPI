@@ -1,5 +1,6 @@
 package com.clinica.api.services;
 
+import com.clinica.api.exception.NotFound;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.clinica.api.dto.request.MedicoRequest;
@@ -56,7 +57,7 @@ public class MedicoService {
         log.info("Buscando medico com ID {}", id);
 
         Medico medico = medicoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Médico não encontrado"));
+                .orElseThrow(() -> new NotFound("Médico não encontrado"));
 
         return converterParaResponse(medico);
     }
@@ -66,7 +67,7 @@ public class MedicoService {
         log.info("Cadastrando novo medico com CRM {}", request.getCrm());
         Especialidade especialidade = especialidadeRepository
                 .findById(request.getEspecialidadeId())
-                .orElseThrow(() -> new RuntimeException("Especialidade não encontrada"));
+                .orElseThrow(() -> new NotFound("Especialidade não encontrada"));
 
         Medico medico = new Medico();
         medico.setNome(request.getNome());
@@ -84,11 +85,11 @@ public class MedicoService {
     public MedicoResponse atualizar(Long id, MedicoRequest request) {
         log.info("Atualizando medico com o ID {}", id);
         Medico medico = medicoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Medico não encontrado"));
+                .orElseThrow(() -> new NotFound("Medico não encontrado"));
 
         Especialidade especialidade = especialidadeRepository
                 .findById(request.getEspecialidadeId())
-                .orElseThrow(() -> new RuntimeException("Especialidade não encontrada"));
+                .orElseThrow(() -> new NotFound("Especialidade não encontrada"));
 
 
         medico.setNome(request.getNome());
@@ -105,7 +106,7 @@ public class MedicoService {
     public void deletar(Long id) {
         log.info("Deletando medico com o ID {}", id);
         Medico medico = medicoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Medico não encontrado"));
+                .orElseThrow(() -> new NotFound("Medico não encontrado"));
 
         medico.setAtivo(false);
 

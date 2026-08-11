@@ -122,7 +122,7 @@ public class ConsultaService {
     public ConsultaResponse cancelar(Long id, CancelarConsultaRequest request) {
         log.info("Cancelando consulta com ID {}", id);
         Consulta consulta = consultaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Consulta não encontrada"));
+                .orElseThrow(() -> new NotFound("Consulta não encontrada"));
 
         LocalDateTime agora = LocalDateTime.now();
         long horas = Duration.between(agora, consulta.getDataHora()).toHours();
