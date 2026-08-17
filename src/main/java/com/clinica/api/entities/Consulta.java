@@ -13,6 +13,8 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(of = "id")
+@ToString
 public class Consulta {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

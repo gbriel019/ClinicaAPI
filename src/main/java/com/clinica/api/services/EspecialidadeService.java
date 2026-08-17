@@ -1,5 +1,6 @@
 package com.clinica.api.services;
 
+import com.clinica.api.config.mappers.EspecialidadeMapper;
 import com.clinica.api.exception.NotFound;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,24 +18,20 @@ import java.util.List;
 public class EspecialidadeService {
 
     private final EspecialidadeRepository especialidadeRepository;
+    private final EspecialidadeMapper especialidadeMapper;
 
-    public EspecialidadeService(EspecialidadeRepository especialidadeRepository) {
+    public EspecialidadeService(EspecialidadeRepository especialidadeRepository, EspecialidadeMapper especialidadeMapper) {
         this.especialidadeRepository = especialidadeRepository;
+        this.especialidadeMapper = especialidadeMapper;
     }
 
     private static final Logger log = LoggerFactory.getLogger(EspecialidadeService.class);
 
-    private EspecialidadeResponse converterParaResponse(Especialidade especialidade) {
-        EspecialidadeResponse response = new EspecialidadeResponse();
-        response.setId(especialidade.getId());
-        response.setNome(especialidade.getNome());
 
-        return response;
-    }
     @Cacheable("especialidades")
     public List<EspecialidadeResponse> buscarTodos(){
         log.info("Buscando todas as especialidades");
-        return especialidadeRepository.findAll().stream().map(this::converterParaResponse).toList();
+        return especialidadeRepository.findAll().stream().map(especialidadeMapper::toResponse).toList();
     }
 
     @Cacheable(value = "especialidade", key = "#id")
@@ -42,20 +39,19 @@ public class EspecialidadeService {
         log.info("Buscando especialidade com ID {}", id);
         Especialidade especialidade = especialidadeRepository.findById(id)
                 .orElseThrow(() -> new NotFound("Especialidade não encontrada"));
-        return converterParaResponse(especialidade);
+        return especialidadeMapper.toResponse(especialidade);
     }
 
     @CacheEvict(value = {"especialidades", "especialidade"}, allEntries = true)
     public EspecialidadeResponse salvar(EspecialidadeRequest request) {
         log.info("Cadastrando nova especialidade {}", request.getNome());
-        Especialidade especialidade = new Especialidade();
-        especialidade.setNome(request.getNome());
+        Especialidade especialidade = especialidadeMapper.toEntity(request);
         if (especialidadeRepository.findByNome(especialidade.getNome()).isPresent()) {
             throw new RuntimeException("Já existe uma especialidade com esse nome");
         }
         Especialidade especialidadeSalva = especialidadeRepository.save(especialidade);
 
-        return converterParaResponse(especialidadeSalva);
+        return especialidadeMapper.toResponse(especialidadeSalva);
     }
 
     @CacheEvict(value = {"especialidades", "especialidade"}, allEntries = true)
@@ -69,14 +65,14 @@ public class EspecialidadeService {
 
         Especialidade especialidadeAtualizada = especialidadeRepository.save(especialidade);
 
-        return converterParaResponse(especialidadeAtualizada);
+        return especialidadeMapper.toResponse(especialidadeAtualizada);
     }
 
     @CacheEvict(value = {"especialidades", "especialidade"}, allEntries = true)
     public void deletar(Long id){
         log.info("Deletando especialidade com o ID {}", id);
         Especialidade especialidade = especialidadeRepository.findById(id)
-                        .orElseThrow(() -> new NotFound("Especialidade não encontrada"));
+                .orElseThrow(() -> new NotFound("Especialidade não encontrada"));
         especialidadeRepository.delete(especialidade);
     }
 }

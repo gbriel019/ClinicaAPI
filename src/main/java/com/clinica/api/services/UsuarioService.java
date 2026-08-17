@@ -1,6 +1,6 @@
 package com.clinica.api.services;
 
-import com.clinica.api.exception.ConflictException;
+import com.clinica.api.config.mappers.UsuarioMapper;
 import com.clinica.api.exception.NotFound;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,43 +19,31 @@ import java.util.List;
 public class UsuarioService {
 
     private final PasswordEncoder passwordEncoder;
-
-
     private final UsuarioRepository usuarioRepository;
+    private final UsuarioMapper usuarioMapper;
 
-    public UsuarioService(PasswordEncoder passwordEncoder, UsuarioRepository usuarioRepository) {
+    public UsuarioService(PasswordEncoder passwordEncoder, UsuarioRepository usuarioRepository, UsuarioMapper usuarioMapper) {
         this.passwordEncoder = passwordEncoder;
         this.usuarioRepository = usuarioRepository;
+        this.usuarioMapper = usuarioMapper;
     }
 
     private static final Logger log = LoggerFactory.getLogger(UsuarioService.class);
 
-    private UsuarioResponse converterParaResponse(Usuario usuario) {
-
-        UsuarioResponse response = new UsuarioResponse();
-        response.setId(usuario.getId());
-        response.setNome(usuario.getNome());
-        response.setEmail(usuario.getEmail());
-        response.setRole(usuario.getRole());
-        response.setAtivo(usuario.getAtivo());
-
-
-        return response;
-    }
 
     @Cacheable("usuarios")
     public List<UsuarioResponse> buscarTodos(){
         log.info("Buscando todos os usuarios");
-        return usuarioRepository.findAll().stream().map(this::converterParaResponse).toList();
+        return usuarioRepository.findAll().stream().map(usuarioMapper::toResponse).toList();
     }
 
     @Cacheable(value = "usuario", key = "#id")
     public UsuarioResponse buscarPorId(Long id) {
         log.info("Buscando usuario com ID {}", id);
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new NotFound("Usuário não encontrada"));
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrada"));
 
-        return converterParaResponse(usuario);
+        return usuarioMapper.toResponse(usuario);
     }
 
     @CacheEvict(value = {"usuarios", "usuario"}, allEntries = true)
@@ -63,22 +51,17 @@ public class UsuarioService {
         log.info("Salvando usuario com email {}", request.getEmail());
 
         if (usuarioRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new ConflictException("Já existe um usuário com este e-mail");
+            throw new RuntimeException("Já existe um usuário com este e-mail");
         }
 
-        Usuario usuario = new Usuario();
-        usuario.setNome(request.getNome());
-        usuario.setEmail(request.getEmail());
+        Usuario usuario = usuarioMapper.toEntity(request);
 
-        // Criptografa a senha antes de salvar
+        // Criptografa a senha antes de salvar (mapper ignora "senha" de propósito)
         usuario.setSenha(passwordEncoder.encode(request.getSenha()));
-
-        usuario.setRole(request.getRole());
-        usuario.setAtivo(request.getAtivo());
 
         Usuario usuarioSalvo = usuarioRepository.save(usuario);
 
-        return converterParaResponse(usuarioSalvo);
+        return usuarioMapper.toResponse(usuarioSalvo);
     }
 
     @CacheEvict(value = {"usuarios", "usuario"}, allEntries = true)
@@ -95,7 +78,7 @@ public class UsuarioService {
 
 
         Usuario usuarioAtualizado = usuarioRepository.save(usuario);
-        return converterParaResponse(usuarioAtualizado);
+        return usuarioMapper.toResponse(usuarioAtualizado);
     }
 
     @CacheEvict(value = {"usuarios", "usuario"}, allEntries = true)

@@ -3,11 +3,10 @@ package com.clinica.api.dto.request;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
+
+@Data
 public class MedicoRequest {
 
     @NotBlank(message = "O nome do médico é obrigatório")

@@ -1,13 +1,12 @@
 package com.clinica.api.dto.request;
 
 import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+
 
 import java.time.LocalDateTime;
 
-@Getter
-@Setter
+@Data
 public class ConsultaRequest {
 
     @NotNull

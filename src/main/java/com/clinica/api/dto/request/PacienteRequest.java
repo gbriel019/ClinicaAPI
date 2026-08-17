@@ -2,13 +2,12 @@ package com.clinica.api.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+
 
 import java.time.LocalDate;
 
-@Getter
-@Setter
+@Data
 public class PacienteRequest {
 
     @NotBlank(message = "O nome do paciente é obrigatório")

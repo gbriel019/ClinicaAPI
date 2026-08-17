@@ -4,10 +4,9 @@ import com.clinica.api.enums.Role;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "usuarios")
@@ -15,6 +14,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(of = "id")
+@ToString
 
 public class Usuario {
 
@@ -41,5 +42,9 @@ public class Usuario {
 
     @Column(nullable = false)
     private Boolean ativo = true;
+
+    private Integer tentativasFalhas = 0;
+
+    private LocalDateTime bloqueadoAte;
 
 }

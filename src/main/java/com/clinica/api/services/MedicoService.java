@@ -1,10 +1,10 @@
 package com.clinica.api.services;
 
+import com.clinica.api.config.mappers.MedicoMapper;
 import com.clinica.api.exception.NotFound;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.clinica.api.dto.request.MedicoRequest;
-import com.clinica.api.dto.response.EspecialidadeResponse;
 import com.clinica.api.dto.response.MedicoResponse;
 import com.clinica.api.entities.Especialidade;
 import com.clinica.api.entities.Medico;
@@ -21,35 +21,20 @@ public class MedicoService {
 
     private final MedicoRepository medicoRepository;
     private final EspecialidadeRepository especialidadeRepository;
+    private final MedicoMapper medicoMapper;
 
-    public MedicoService(MedicoRepository medicoRepository, EspecialidadeRepository especialidadeRepository) {
+    public MedicoService(MedicoRepository medicoRepository, EspecialidadeRepository especialidadeRepository, MedicoMapper medicoMapper) {
         this.medicoRepository = medicoRepository;
         this.especialidadeRepository = especialidadeRepository;
+        this.medicoMapper = medicoMapper;
     }
 
     private static final Logger log = LoggerFactory.getLogger(MedicoService.class);
 
-    private MedicoResponse converterParaResponse(Medico medico) {
-        EspecialidadeResponse especialidadeResponse = new EspecialidadeResponse();
-        especialidadeResponse.setId(medico.getEspecialidade().getId());
-        especialidadeResponse.setNome(medico.getEspecialidade().getNome());
-
-        MedicoResponse response = new MedicoResponse();
-        response.setId(medico.getId());
-        response.setNome(medico.getNome());
-        response.setCrm(medico.getCrm());
-        response.setEmail(medico.getEmail());
-        response.setTelefone(medico.getTelefone());
-        response.setEspecialidade(especialidadeResponse);
-        response.setAtivo(medico.getAtivo());
-
-        return response;
-    }
-
     @Cacheable("medicos")
     public List<MedicoResponse> buscarTodos(){
         log.info("Buscando todos os medicos");
-        return medicoRepository.findAll().stream().map(this::converterParaResponse).toList();
+        return medicoRepository.findAll().stream().map(medicoMapper::toResponse).toList();
     }
 
     @Cacheable(value = "medico", key = "#id")
@@ -59,7 +44,7 @@ public class MedicoService {
         Medico medico = medicoRepository.findById(id)
                 .orElseThrow(() -> new NotFound("Médico não encontrado"));
 
-        return converterParaResponse(medico);
+        return medicoMapper.toResponse(medico);
     }
 
     @CacheEvict(value = {"medicos", "medico"}, allEntries = true)
@@ -69,16 +54,12 @@ public class MedicoService {
                 .findById(request.getEspecialidadeId())
                 .orElseThrow(() -> new NotFound("Especialidade não encontrada"));
 
-        Medico medico = new Medico();
-        medico.setNome(request.getNome());
-        medico.setCrm(request.getCrm());
-        medico.setEmail(request.getEmail());
-        medico.setTelefone(request.getTelefone());
+        Medico medico = medicoMapper.toEntity(request);
         medico.setEspecialidade(especialidade);
 
         Medico medicoSalvo = medicoRepository.save(medico);
 
-        return converterParaResponse(medicoSalvo);
+        return medicoMapper.toResponse(medicoSalvo);
     }
 
     @CacheEvict(value = {"medicos", "medico"}, allEntries = true)
@@ -99,7 +80,7 @@ public class MedicoService {
         medico.setEspecialidade(especialidade);
 
         Medico medicoAtualizado = medicoRepository.save(medico);
-        return converterParaResponse(medicoAtualizado);
+        return medicoMapper.toResponse(medicoAtualizado);
     }
 
     @CacheEvict(value = {"medicos", "medico"}, allEntries = true)
