@@ -2,6 +2,7 @@ package com.clinica.api.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -11,6 +12,20 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(ContaBloqueadaException.class)
+    public ResponseEntity<Map<String, String>> tratarContaBloqueada(ContaBloqueadaException ex) {
+        return ResponseEntity
+                .status(HttpStatus.LOCKED)
+                .body(Map.of("erro", ex.getMessage()));
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<Map<String, String>> tratarBadCredentials(BadCredentialsException ex) {
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of("erro", ex.getMessage()));
+    }
 
     @ExceptionHandler(NotFound.class)
     public ResponseEntity<Map<String, String>> tratarNotFound(NotFound ex) {
