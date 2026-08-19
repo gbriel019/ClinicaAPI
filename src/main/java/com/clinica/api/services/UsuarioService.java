@@ -14,7 +14,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import com.clinica.api.exception.ConflictException;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -50,7 +49,7 @@ public class UsuarioService {
     public UsuarioResponse buscarPorId(Long id) {
         log.info("Buscando usuario com ID {}", id);
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new NotFound("Usuário não encontrada"));
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrada"));
 
         return usuarioMapper.toResponse(usuario);
     }
@@ -60,7 +59,7 @@ public class UsuarioService {
         log.info("Salvando usuario com email {}", request.getEmail());
 
         if (usuarioRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new ConflictException("Já existe um usuário com este e-mail");
+            throw new RuntimeException("Já existe um usuário com este e-mail");
         }
 
         Usuario usuario = usuarioMapper.toEntity(request);
