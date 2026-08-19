@@ -19,6 +19,8 @@ import com.clinica.api.repositories.PacienteRepository;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import com.clinica.api.exception.BadRequestException;
+import com.clinica.api.exception.ConflictException;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -69,36 +71,36 @@ public class ConsultaService {
                 .orElseThrow(() -> new NotFound("Paciente não encontrado"));
 
         if (!medico.getAtivo()) {
-            throw new RuntimeException("Não é possível agendar consulta para um médico inativo");
+            throw new BadRequestException("Não é possível agendar consulta para um médico inativo");
         }
 
         if (!paciente.getAtivo()) {
-            throw new RuntimeException(("Não é possivel agendar uma consulta com o paciente inativo"));
+            throw new BadRequestException(("Não é possivel agendar uma consulta com o paciente inativo"));
         }
 
         if (request.getDataHora().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("Não é possível agendar uma consulta em uma data/horário no passado");
+            throw new BadRequestException("Não é possível agendar uma consulta em uma data/horário no passado");
         }
 
             int hora = request.getDataHora().getHour();
             if (hora < 7 || hora >= 19) {
-                throw new RuntimeException("Horário indisponivel para Agendamento");
+                throw new BadRequestException("Horário indisponivel para Agendamento");
             }
 
             DayOfWeek diaSemana = request.getDataHora().getDayOfWeek();
             if (diaSemana == DayOfWeek.SATURDAY || diaSemana == DayOfWeek.SUNDAY) {
-                throw new RuntimeException("Dia indisponivel para Agendamento");
+                throw new BadRequestException("Dia indisponivel para Agendamento");
             }
 
             if (consultaRepository.existsByMedicoAndDataHora(medico, request.getDataHora())) {
-                throw new RuntimeException("O médico já possui uma consulta neste horário");
+                throw new ConflictException("O médico já possui uma consulta neste horário");
             }
 
             LocalDateTime inicioDoDia = request.getDataHora().toLocalDate().atStartOfDay();
             LocalDateTime finalDoDia = request.getDataHora().toLocalDate().atTime(23, 59, 59);
 
             if (consultaRepository.existsByPacienteAndDataHoraBetween(paciente, inicioDoDia, finalDoDia)) {
-                throw new RuntimeException("O paciente já possui uma consulta Agendada neste dia");
+                throw new ConflictException("O paciente já possui uma consulta Agendada neste dia");
             }
 
             Consulta consulta = consultaMapper.toEntity(request);
@@ -120,7 +122,7 @@ public class ConsultaService {
             long horas = Duration.between(agora, consulta.getDataHora()).toHours();
 
             if (horas < 24) {
-                throw new RuntimeException("A consulta so pode ser cancelada com 24 horas de antecedencia");
+                throw new BadRequestException("A consulta so pode ser cancelada com 24 horas de antecedencia");
             }
 
             consulta.setStatus(StatusConsulta.CANCELADA);
