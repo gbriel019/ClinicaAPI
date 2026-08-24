@@ -30,6 +30,12 @@ public class PacienteController {
         return ResponseEntity.ok(pacienteService.buscarPorId(id));
     }
 
+    @GetMapping("/buscar")
+    public List<PacienteResponse> buscarPorNome(
+            @RequestParam String nome) {
+        return pacienteService.buscarPorNome(nome);
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<PacienteResponse> atualizar(@PathVariable Long id,
                                               @Valid @RequestBody PacienteRequest request) {

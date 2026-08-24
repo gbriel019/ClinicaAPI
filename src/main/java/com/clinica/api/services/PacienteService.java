@@ -34,6 +34,13 @@ public class PacienteService {
         return pacienteRepository.findAll().stream().map(pacienteMapper::toResponse).toList();
     }
 
+    public List<PacienteResponse> buscarPorNome(String nome) {
+        return pacienteRepository.findByNomeContainingIgnoreCase(nome)
+                .stream()
+                .map(pacienteMapper::toResponse)
+                .toList();
+    }
+
     @Cacheable(value = "paciente", key = "#id")
     public PacienteResponse buscarPorId(Long id) {
         log.info("Buscando paciente com ID {}", id);
