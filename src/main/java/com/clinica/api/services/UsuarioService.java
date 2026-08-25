@@ -1,6 +1,7 @@
 package com.clinica.api.services;
 
 import com.clinica.api.config.mappers.UsuarioMapper;
+import com.clinica.api.exception.ConflictException;
 import com.clinica.api.exception.ContaBloqueadaException;
 import com.clinica.api.exception.NotFound;
 import org.slf4j.Logger;
@@ -49,7 +50,7 @@ public class UsuarioService {
     public UsuarioResponse buscarPorId(Long id) {
         log.info("Buscando usuario com ID {}", id);
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrada"));
+                .orElseThrow(() -> new NotFound("Usuário não encontrada"));
 
         return usuarioMapper.toResponse(usuario);
     }
@@ -59,7 +60,7 @@ public class UsuarioService {
         log.info("Salvando usuario com email {}", request.getEmail());
 
         if (usuarioRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new RuntimeException("Já existe um usuário com este e-mail");
+            throw new ConflictException("Já existe um usuário com este e-mail");
         }
 
         Usuario usuario = usuarioMapper.toEntity(request);

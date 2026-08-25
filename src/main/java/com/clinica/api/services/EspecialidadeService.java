@@ -1,6 +1,7 @@
 package com.clinica.api.services;
 
 import com.clinica.api.config.mappers.EspecialidadeMapper;
+import com.clinica.api.exception.ConflictException;
 import com.clinica.api.exception.NotFound;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +48,7 @@ public class EspecialidadeService {
         log.info("Cadastrando nova especialidade {}", request.getNome());
         Especialidade especialidade = especialidadeMapper.toEntity(request);
         if (especialidadeRepository.findByNome(especialidade.getNome()).isPresent()) {
-            throw new RuntimeException("Já existe uma especialidade com esse nome");
+            throw new ConflictException("Já existe uma especialidade com esse nome");
         }
         Especialidade especialidadeSalva = especialidadeRepository.save(especialidade);
 

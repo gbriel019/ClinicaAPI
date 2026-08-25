@@ -1,6 +1,7 @@
 package com.clinica.api.services;
 
 import com.clinica.api.config.mappers.PacienteMapper;
+import com.clinica.api.exception.ConflictException;
 import com.clinica.api.exception.NotFound;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,11 +56,11 @@ public class PacienteService {
         log.info("Salvando paciente com CPF {}", request.getCpf());
 
         if (pacienteRepository.findByCpf(request.getCpf()).isPresent()) {
-            throw new RuntimeException("Já existe um paciente com esse CPF");
+            throw new ConflictException("Já existe um paciente com esse CPF");
         }
 
         if (pacienteRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new RuntimeException("Já existe um paciente com esse e-mail");
+            throw new ConflictException("Já existe um paciente com esse e-mail");
         }
 
         Paciente paciente = pacienteMapper.toEntity(request);

@@ -5,8 +5,10 @@ import com.clinica.api.dto.request.RefreshTokenRequest;
 import com.clinica.api.dto.response.LoginResponse;
 import com.clinica.api.config.security.JwtService;
 import com.clinica.api.entities.Usuario;
+import com.clinica.api.services.LoginAttemptService;
 import com.clinica.api.services.UsuarioService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -24,30 +26,33 @@ public class AuthController {
     private final JwtService jwtService;
     private final UsuarioService usuarioService;
     private final CustomUserDetailsService customUserDetailsService;
+    private final LoginAttemptService loginAttemptService;
 
     public AuthController(
             AuthenticationManager authenticationManager,
             JwtService jwtService,
-            UsuarioService usuarioService, CustomUserDetailsService customUserDetailsService) {
+            UsuarioService usuarioService, CustomUserDetailsService customUserDetailsService, LoginAttemptService loginAttemptService) {
 
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.usuarioService = usuarioService;
         this.customUserDetailsService = customUserDetailsService;
+        this.loginAttemptService = loginAttemptService;
     }
 
 
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(
-            @RequestBody LoginRequest request) {
+            @RequestBody LoginRequest request,
+            HttpServletRequest httpRequest) {
 
-        // Busca o usuário e verifica se ele está bloqueado antes de tentar autenticar.
-        // Vale tanto para ADMIN quanto para RECEPCIONISTA
-        Usuario usuario = usuarioService.buscarPorEmail(request.getEmail());
-        usuarioService.validarBloqueio(usuario);
+        String ip = httpRequest.getRemoteAddr();
+
+        loginAttemptService.verificarBloqueio(ip);
 
         try {
+
             Authentication authentication =
                     authenticationManager.authenticate(
                             new UsernamePasswordAuthenticationToken(
@@ -56,26 +61,27 @@ public class AuthController {
                             )
                     );
 
-            // Senha correta zera o contador de tentativas e qualquer bloqueio.
-            usuarioService.registrarLoginSucesso(usuario);
+            loginAttemptService.registrarSucesso(ip);
 
             UserDetails userDetails =
                     (UserDetails) authentication.getPrincipal();
 
-            String accessToken = jwtService.gerarAccessToken(userDetails);
-            String refreshToken = jwtService.gerarRefreshToken(userDetails);
+            String accessToken =
+                    jwtService.gerarAccessToken(userDetails);
+
+            String refreshToken =
+                    jwtService.gerarRefreshToken(userDetails);
 
             return ResponseEntity.ok(
                     new LoginResponse(accessToken, refreshToken)
             );
 
         } catch (BadCredentialsException ex) {
-            // Senha incorreta inicia o contador e se chegar em 3, bloqueia.
-            usuarioService.registrarTentativaFalha(usuario);
+
+            loginAttemptService.registrarFalha(ip);
+
             throw ex;
         }
-
-
     }
 
     @PostMapping("/refresh")
