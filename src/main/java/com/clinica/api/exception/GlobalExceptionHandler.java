@@ -27,6 +27,7 @@ public class GlobalExceptionHandler {
                 .body(Map.of("erro", ex.getMessage()));
     }
 
+    //Serve para cep não encontrado também
     @ExceptionHandler(NotFound.class)
     public ResponseEntity<Map<String, String>> tratarNotFound(NotFound ex) {
 
@@ -51,5 +52,10 @@ public class GlobalExceptionHandler {
         ex.getBindingResult().getFieldErrors()
                 .forEach(e -> erros.put(e.getField(), e.getDefaultMessage()));
         return ResponseEntity.badRequest().body(erros);
+    }
+
+    @ExceptionHandler(ServicoIndisponivelException.class)
+    public ResponseEntity<Map<String, String>> TratarServicoIndisponivel(ServicoIndisponivelException ex) {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(Map.of("erro", ex.getMessage()));
     }
 }

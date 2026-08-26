@@ -23,4 +23,7 @@ public class PacienteRequest {
     private String telefone;
 
     private LocalDate dataNascimento;
+
+    @NotBlank(message = "O campo CEP é obrigatório")
+    private String cep;
 }
