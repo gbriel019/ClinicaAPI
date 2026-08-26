@@ -1,14 +1,14 @@
 package com.clinica.api.services;
 
-import com.clinica.api.config.RestTemplate;
 import com.clinica.api.dto.externals.ViaCepResponse;
 import com.clinica.api.exception.BadRequestException;
 import com.clinica.api.exception.NotFound;
 import com.clinica.api.exception.ServicoIndisponivelException;
-import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 
 
 @Service

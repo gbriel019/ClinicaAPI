@@ -21,5 +21,15 @@ public class PacienteResponse {
 
     private LocalDate dataNascimento;
 
+    private String cep;
+
+    private String logradouro;
+
+    private String bairro;
+
+    private String cidade;
+
+    private String uf;
+
     private Boolean ativo;
 }

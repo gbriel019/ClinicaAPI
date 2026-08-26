@@ -1,6 +1,7 @@
 package com.clinica.api.services;
 
 import com.clinica.api.config.mappers.PacienteMapper;
+import com.clinica.api.dto.externals.ViaCepResponse;
 import com.clinica.api.exception.ConflictException;
 import com.clinica.api.exception.NotFound;
 import org.slf4j.Logger;
@@ -20,10 +21,12 @@ public class PacienteService {
 
     private final PacienteRepository pacienteRepository;
     private final PacienteMapper pacienteMapper;
+    private final ViaCepService viaCepService;
 
-    public PacienteService(PacienteRepository pacienteRepository, PacienteMapper pacienteMapper) {
+    public PacienteService(PacienteRepository pacienteRepository, PacienteMapper pacienteMapper, ViaCepService viaCepService) {
         this.pacienteRepository = pacienteRepository;
         this.pacienteMapper = pacienteMapper;
+        this.viaCepService = viaCepService;
     }
 
     private static final Logger log = LoggerFactory.getLogger(PacienteService.class);
@@ -58,15 +61,20 @@ public class PacienteService {
         if (pacienteRepository.findByCpf(request.getCpf()).isPresent()) {
             throw new ConflictException("Já existe um paciente com esse CPF");
         }
-
         if (pacienteRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new ConflictException("Já existe um paciente com esse e-mail");
         }
 
+        ViaCepResponse endereco = viaCepService.buscarEndereco(request.getCep());
+
         Paciente paciente = pacienteMapper.toEntity(request);
+        paciente.setCep(endereco.getCep());
+        paciente.setLogradouro(endereco.getLogradouro());
+        paciente.setBairro(endereco.getBairro());
+        paciente.setCidade(endereco.getLocalidade());
+        paciente.setUf(endereco.getUf());
 
         Paciente pacienteSalvo = pacienteRepository.save(paciente);
-
         log.info("Paciente salvo com sucesso ID {}", pacienteSalvo.getId());
 
         return pacienteMapper.toResponse(pacienteSalvo);
