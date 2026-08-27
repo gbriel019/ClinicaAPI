@@ -2,7 +2,9 @@ package com.clinica.api.services;
 
 
 import com.clinica.api.dto.externals.FeriadoResponse;
+import com.clinica.api.exception.ServicoIndisponivelException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
@@ -20,15 +22,20 @@ public class FeriadoService {
     }
 
     public List<FeriadoResponse> buscarFeriados(int ano){
-        FeriadoResponse[] resposta = restTemplate.getForObject(
-                FERIADOS_URL,
-                FeriadoResponse[].class,
-                ano
-        );
 
-        return resposta != null
-                ? Arrays.asList(resposta)
-                : List.of();
+        try {
+            FeriadoResponse[] resposta = restTemplate.getForObject(
+                    FERIADOS_URL,
+                    FeriadoResponse[].class,
+                    ano
+            );
+
+            return resposta != null
+                    ? Arrays.asList(resposta)
+                    : List.of();
+        } catch (RestClientException ex) {
+            throw new ServicoIndisponivelException("Serviço de consulta de feriado indisponivel no momento");
+        }
     }
 
     public boolean ehFeriado(LocalDate data){
