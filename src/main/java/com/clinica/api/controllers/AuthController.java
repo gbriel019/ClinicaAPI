@@ -4,7 +4,6 @@ import com.clinica.api.dto.request.LoginRequest;
 import com.clinica.api.dto.request.RefreshTokenRequest;
 import com.clinica.api.dto.response.LoginResponse;
 import com.clinica.api.config.security.JwtService;
-import com.clinica.api.entities.Usuario;
 import com.clinica.api.services.LoginAttemptService;
 import com.clinica.api.services.UsuarioService;
 
