@@ -34,12 +34,14 @@ public class ConsultaService {
     private final MedicoRepository medicoRepository;
     private final PacienteRepository pacienteRepository;
     private final ConsultaMapper consultaMapper;
+    private final FeriadoService feriadoService;
 
-    public ConsultaService(ConsultaRepository consultaRepository, MedicoRepository medicoRepository, PacienteRepository pacienteRepository, ConsultaMapper consultaMapper) {
+    public ConsultaService(ConsultaRepository consultaRepository, MedicoRepository medicoRepository, PacienteRepository pacienteRepository, ConsultaMapper consultaMapper, FeriadoService feriadoService) {
         this.consultaRepository = consultaRepository;
         this.medicoRepository = medicoRepository;
         this.pacienteRepository = pacienteRepository;
         this.consultaMapper = consultaMapper;
+        this.feriadoService = feriadoService;
     }
 
     private static final Logger log = LoggerFactory.getLogger(ConsultaService.class);
@@ -90,6 +92,11 @@ public class ConsultaService {
             DayOfWeek diaSemana = request.getDataHora().getDayOfWeek();
             if (diaSemana == DayOfWeek.SATURDAY || diaSemana == DayOfWeek.SUNDAY) {
                 throw new BadRequestException("Dia indisponivel para Agendamento");
+            }
+
+            //manda uma requisição para verificar se o dia que está tentando cadastrar a consulta é feriado ou não
+            if (feriadoService.ehFeriado(request.getDataHora().toLocalDate())) {
+                throw new BadRequestException("Não é possivel agendar uma consulta em um feriado");
             }
 
             if (consultaRepository.existsByMedicoAndDataHora(medico, request.getDataHora())) {

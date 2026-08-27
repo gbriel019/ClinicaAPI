@@ -5,6 +5,7 @@ import com.clinica.api.dto.externals.FeriadoResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
@@ -28,6 +29,13 @@ public class FeriadoService {
         return resposta != null
                 ? Arrays.asList(resposta)
                 : List.of();
+    }
+
+    public boolean ehFeriado(LocalDate data){
+
+        List<FeriadoResponse> feriados = buscarFeriados(data.getYear());
+
+        return feriados.stream().anyMatch(feriado -> feriado.getDate().equals(data));
     }
 
 }
