@@ -1,5 +1,7 @@
 package com.clinica.api.config.security;
 
+import com.clinica.api.entities.Usuario;
+import com.clinica.api.repositories.UsuarioRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,13 +22,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final CustomUserDetailsService userDetailsService;
+    private final UsuarioRepository usuarioRepository;
 
     public JwtAuthenticationFilter(
             JwtService jwtService,
-            CustomUserDetailsService userDetailsService) {
+            CustomUserDetailsService userDetailsService, UsuarioRepository usuarioRepository) {
 
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
+        this.usuarioRepository = usuarioRepository;
     }
 
     @Override
@@ -84,14 +88,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext()
                         .setAuthentication(authentication);
 
-                MDC.put("usuario", userDetails.getUsername());
+                Usuario usuario = usuarioRepository.findByEmail(userDetails.getUsername())
+                                .orElse(null);
+                MDC.put("id", usuario.getId().toString());
             }
         }
 
         try {
             filterChain.doFilter(request, response);
         } finally {
-            MDC.remove("usuario");
+            MDC.remove("id");
         }
     }
 }

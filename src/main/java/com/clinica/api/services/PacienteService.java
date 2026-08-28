@@ -56,13 +56,13 @@ public class PacienteService {
 
     @CacheEvict(value = {"pacientes", "paciente"}, allEntries = true)
     public PacienteResponse salvar(PacienteRequest request) {
-        log.info("Salvando paciente com CPF {}", request.getCpf());
+        log.info("Salvando paciente");
 
         if (pacienteRepository.findByCpf(request.getCpf()).isPresent()) {
-            throw new ConflictException("Já existe um paciente com esse CPF");
+            throw new ConflictException("CPF já cadastrado");
         }
         if (pacienteRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new ConflictException("Já existe um paciente com esse e-mail");
+            throw new ConflictException("E-mail já cadastrado");
         }
 
         ViaCepResponse endereco = viaCepService.buscarEndereco(request.getCep());

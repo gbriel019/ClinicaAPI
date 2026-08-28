@@ -60,7 +60,7 @@ public class UsuarioService {
         log.info("Salvando usuario com email {}", request.getEmail());
 
         if (usuarioRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new ConflictException("Já existe um usuário com este e-mail");
+            throw new ConflictException("Esse e-mail já está cadastrado");
         }
 
         Usuario usuario = usuarioMapper.toEntity(request);

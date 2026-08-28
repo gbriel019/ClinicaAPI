@@ -16,10 +16,10 @@ public class ApiApplication {
 				.load();
 
 		Map<String, Object> properties = Map.of(
-				"DB_URL", dotenv.get("DB_URL"),
-				"DB_USERNAME", dotenv.get("DB_USERNAME"),
-				"DB_PASSWORD", dotenv.get("DB_PASSWORD"),
-				"JWT_SECRET", dotenv.get("JWT_SECRET")
+				"spring.datasource.url", dotenv.get("DB_URL"),
+				"spring.datasource.username", dotenv.get("DB_USERNAME"),
+				"spring.datasource.password", dotenv.get("DB_PASSWORD"),
+				"api.security.token.secret", dotenv.get("JWT_SECRET")
 		);
 
 		SpringApplication app = new SpringApplication(ApiApplication.class);
