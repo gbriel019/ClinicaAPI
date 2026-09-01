@@ -2,6 +2,7 @@ HELP.md
 target/
 .env
 logs/
+clinica-backup.sql
 
 
 .mvn/wrapper/maven-wrapper.jar
