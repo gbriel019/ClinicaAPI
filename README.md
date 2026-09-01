@@ -25,6 +25,7 @@ O projeto conta com autenticação e autorização utilizando **JWT e Spring Sec
 * Cadastro, consulta, atualização e exclusão de médicos
 * Cadastro e gerenciamento de especialidades
 * Agendamento e gerenciamento de consultas
+* Consultar disponibilidade do médico em alguma data de funcionamento
 * Validação de regras de negócio para consultas
 * Autenticação utilizando JWT
 * Access Token e Refresh Token
