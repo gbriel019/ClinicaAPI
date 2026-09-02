@@ -1,5 +1,6 @@
 package com.clinica.api.config.security;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -79,7 +80,6 @@ public class SecurityConfig {
                         .hasRole("ADMIN")
 
 
-
                         // ESPECIALIDADES
                         .requestMatchers(HttpMethod.GET, "/especialidades/**")
                         .hasAnyRole("ADMIN", "RECEPCIONISTA", "MEDICO")
@@ -104,14 +104,49 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/consultas/*/cancelar")
                         .hasAnyRole("ADMIN", "RECEPCIONISTA")
 
+                        .requestMatchers(HttpMethod.GET, "/consultas/disponibilidade/*")
+                        .hasAnyRole("ADMIN", "RECEPCIONISTA", "MEDICO")
 
-                        .requestMatchers("/actuator/health", "/actuator/info").permitAll()
-                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+
+                        // ACTUATOR
+                        .requestMatchers("/actuator/health", "/actuator/info")
+                        .permitAll()
+
+
+                        // SWAGGER
+                        .requestMatchers(
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html"
+                        )
+                        .permitAll()
+
 
                         // OUTROS ENDPOINTS
                         .anyRequest().authenticated()
                 )
 
+                // teste
+                .exceptionHandling(handling -> handling
+
+                        // teste 401
+                        .authenticationEntryPoint((request, response, authException) ->
+                                response.sendError(
+                                        HttpServletResponse.SC_UNAUTHORIZED,
+                                        "Token ausente, inválido ou expirado"
+                                )
+                        )
+
+                        // teste 403
+                        .accessDeniedHandler((request, response, accessDeniedException) ->
+                                response.sendError(
+                                        HttpServletResponse.SC_FORBIDDEN,
+                                        "Sem permissão para este recurso"
+                                )
+                        )
+                )
+
+                // JWT FILTER
                 .addFilterBefore(
                         jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class
@@ -120,12 +155,14 @@ public class SecurityConfig {
         return http.build();
     }
 
+
     @Bean
     public AuthenticationManager authenticationManager(
             AuthenticationConfiguration configuration) throws Exception {
 
         return configuration.getAuthenticationManager();
     }
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {

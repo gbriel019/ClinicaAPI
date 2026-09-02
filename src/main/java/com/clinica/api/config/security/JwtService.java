@@ -39,6 +39,7 @@ public class JwtService {
                 .compact();
     }
 
+
     private SecretKey getSecretKey() {
         return Keys.hmacShaKeyFor(secret.getBytes());
     }

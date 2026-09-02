@@ -186,8 +186,6 @@ public class ConsultaService {
             return consultaMapper.toResponse(consultaSalva);
         }
 
-
-
         @CacheEvict(value = {"consultas", "consulta"}, allEntries = true)
         public ConsultaResponse cancelar (Long id, CancelarConsultaRequest request){
             log.info("Cancelando consulta com ID {}", id);
