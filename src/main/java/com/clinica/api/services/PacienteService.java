@@ -2,6 +2,7 @@ package com.clinica.api.services;
 
 import com.clinica.api.config.mappers.PacienteMapper;
 import com.clinica.api.dto.externals.ViaCepResponse;
+import com.clinica.api.enums.AcaoAuditoria;
 import com.clinica.api.exception.ConflictException;
 import com.clinica.api.exception.NotFound;
 import org.slf4j.Logger;
@@ -22,11 +23,13 @@ public class PacienteService {
     private final PacienteRepository pacienteRepository;
     private final PacienteMapper pacienteMapper;
     private final ViaCepService viaCepService;
+    private final  AuditoriaService auditoriaService;
 
-    public PacienteService(PacienteRepository pacienteRepository, PacienteMapper pacienteMapper, ViaCepService viaCepService) {
+    public PacienteService(PacienteRepository pacienteRepository, PacienteMapper pacienteMapper, ViaCepService viaCepService, AuditoriaService auditoriaService) {
         this.pacienteRepository = pacienteRepository;
         this.pacienteMapper = pacienteMapper;
         this.viaCepService = viaCepService;
+        this.auditoriaService = auditoriaService;
     }
 
     private static final Logger log = LoggerFactory.getLogger(PacienteService.class);
@@ -74,6 +77,13 @@ public class PacienteService {
         paciente.setUf(endereco.getUf());
 
         Paciente pacienteSalvo = pacienteRepository.save(paciente);
+
+        auditoriaService.registrar(
+                AcaoAuditoria.CRIAR,
+                "PACIENTE",
+                pacienteSalvo.getId()
+        );
+
         log.info("Paciente salvo com sucesso ID {}", pacienteSalvo.getId());
 
         return pacienteMapper.toResponse(pacienteSalvo);
@@ -94,17 +104,29 @@ public class PacienteService {
 
         Paciente pacienteAtualizado = pacienteRepository.save(paciente);
 
+        auditoriaService.registrar(
+                AcaoAuditoria.ATUALIZAR,
+                "PACIENTE",
+                pacienteAtualizado.getId()
+        );
+
         return pacienteMapper.toResponse(pacienteAtualizado);
     }
 
     @CacheEvict(value = {"pacientes", "paciente"}, allEntries = true)
     public void deletar(Long id) {
-        log.info("Deletando paciente com ID {}", id);
+        log.info("Desativando paciente com ID {}", id);
         Paciente paciente = pacienteRepository.findById(id)
                 .orElseThrow(() -> new NotFound("Paciente não encontrado"));
 
         paciente.setAtivo(false);
 
-        pacienteRepository.save(paciente);
+        Paciente pacienteDesativado = pacienteRepository.save(paciente);
+
+        auditoriaService.registrar(
+                AcaoAuditoria.DESATIVAR,
+                "PACIENTE",
+                pacienteDesativado.getId()
+        );
     }
 }

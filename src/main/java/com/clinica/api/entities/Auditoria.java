@@ -1,6 +1,7 @@
 package com.clinica.api.entities;
 
 
+import com.clinica.api.enums.AcaoAuditoria;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,7 +22,8 @@ public class Auditoria {
 
     private String usuario;
 
-    private String acao;
+    @Enumerated(EnumType.STRING)
+    private AcaoAuditoria acao;
 
     private String entidade;
 

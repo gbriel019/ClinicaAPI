@@ -1,24 +1,33 @@
 package com.clinica.api.services;
 
 import com.clinica.api.entities.Auditoria;
+import com.clinica.api.enums.AcaoAuditoria;
 import com.clinica.api.repositories.AuditoriaRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
-public class AuditoriaServices {
+public class AuditoriaService {
 
     private final AuditoriaRepository auditoriaRepository;
 
     public void registrar(
-            String usuario,
-            String acao,
+            AcaoAuditoria acao,
             String entidade,
             Long entidadeId
     ) {
+        Authentication authentication =
+                SecurityContextHolder
+                        .getContext()
+                        .getAuthentication();
+
+        String usuario = authentication.getName();
+
         Auditoria auditoria = Auditoria.builder()
                 .usuario(usuario)
                 .acao(acao)
